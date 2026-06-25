@@ -4,7 +4,9 @@ export const UserService = {
     async getAll() {
         const users = await UserRepository.getAll();
         if (!users) {
-            throw new Error("No se encontraron usuarios");
+            const error = new Error("No se encontraron usuarios");
+            error.statusCode = 404;
+            throw error;
         }
         return users;
     },
@@ -12,7 +14,9 @@ export const UserService = {
     async getById(uid) {
         const user = await UserRepository.getById(uid);
         if (!user) {
-            throw new Error("Usuario no encontrado");
+            const error = new Error("Usuario no encontrado");
+            error.statusCode = 404;
+            throw error;
         }
         return user;
     },
@@ -20,16 +24,22 @@ export const UserService = {
     async create(userData) {
         const { firstName, lastName, email, password, role, isAvailable, documents } = userData;
         if (!firstName || !lastName || !email || !password) {
-            throw new Error("Datos obligatorios no proporcionados");
+            const error = new Error("Datos obligatorios no proporcionados");
+            error.statusCode = 400;
+            throw error;
         }
         const exist = await UserRepository.getByEmail(email);
         if (exist) {
-            throw new Error("Usuario ya existe");
+            const error = new Error("Usuario ya existe");
+            error.statusCode = 400;
+            throw error;
         }
         if (role) {
             const validRoles = [USER_ROLES.ADMIN, USER_ROLES.CUSTOMER, USER_ROLES.DRIVER, USER_ROLES.STORE];
             if (!validRoles.includes(role)) {
-                throw new Error("Rol inválido");
+                const error = new Error("Rol inválido");
+                error.statusCode = 400;
+                throw error;
             }
         }
         const user = await UserRepository.create(userData);
@@ -39,19 +49,25 @@ export const UserService = {
     async update(uid, userData) {
         const user = await UserRepository.getById(uid);
         if (!user) {
-            throw new Error("Usuario no encontrado");
+            const error = new Error("Usuario no encontrado");
+            error.statusCode = 404;
+            throw error;
         }
         const { email, role } = userData;
         if (email) {
             const exist = await UserRepository.getByEmail(email);
             if (exist) {
-                throw new Error("Usuario ya existe");
+                const error = new Error("Usuario ya existe");
+                error.statusCode = 400;
+                throw error;
             }
         }
         if (role) {
             const validRoles = [USER_ROLES.ADMIN, USER_ROLES.CUSTOMER, USER_ROLES.DRIVER, USER_ROLES.STORE];
             if (!validRoles.includes(role)) {
-                throw new Error("Rol inválido");
+                const error = new Error("Rol inválido");
+                error.statusCode = 400;
+                throw error;
             }
         }
         const updatedUser = await UserRepository.update(uid, userData);
@@ -61,7 +77,9 @@ export const UserService = {
     async delete(uid) {
         const user = await UserRepository.getById(uid);
         if (!user) {
-            throw new Error("Usuario no encontrado");
+            const error = new Error("Usuario no encontrado");
+            error.statusCode = 404;
+            throw error;
         }
         const deletedUser = await UserRepository.delete(uid);
         return deletedUser;

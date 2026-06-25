@@ -5,7 +5,9 @@ export const DeliveryService = {
     async getAll() {
         const deliveries = await DeliveryRepository.getAll();
         if (!deliveries) {
-            throw new Error("No se encontraron entregas");
+            const error = new Error("No se encontraron entregas");
+            error.statusCode = 404;
+            throw error;
         }
         return deliveries;
     },
@@ -13,7 +15,9 @@ export const DeliveryService = {
     async getById(did) {
         const delivery = await DeliveryRepository.getById(did);
         if (!delivery) {
-            throw new Error("Entrega no encontrada");
+            const error = new Error("Entrega no encontrada");
+            error.statusCode = 404;
+            throw error;
         }
         return delivery;
     },
@@ -21,7 +25,9 @@ export const DeliveryService = {
     async create(deliveryData) {
         const { order, driver, status, priority, assignedAt, deliveredAt } = deliveryData;
         if (!order || !driver || !status || !priority) {
-            throw new Error("Datos obligatorios no proporcionados");
+            const error = new Error("Datos obligatorios no proporcionados");
+            error.statusCode = 400;
+            throw error;
         }
         assignedAt = status === ORDER_STATUS.ASSIGNED ? new Date() : null;
         deliveredAt = status === ORDER_STATUS.DELIVERED ? new Date() : null;
@@ -33,10 +39,14 @@ export const DeliveryService = {
         const { priority, status, assignedAt, deliveredAt } = deliveryUpdateData;
 
         if (!delivery) {
-            throw new Error("Entrega no encontrada");
+            const error = new Error("Entrega no encontrada");
+            error.statusCode = 404;
+            throw error;
         }
         if (!priority || !status) {
-            throw new Error("Datos obligatorios no proporcionados");
+            const error = new Error("Datos obligatorios no proporcionados");
+            error.statusCode = 400;
+            throw error;
         }
         if (status === ORDER_STATUS.ASSIGNED) {
             assignedAt = new Date();
@@ -51,7 +61,9 @@ export const DeliveryService = {
     async delete(did) {
         const delivery = await DeliveryRepository.getById(did);
         if (!delivery) {
-            throw new Error("Entrega no encontrada");
+            const error = new Error("Entrega no encontrada");
+            error.statusCode = 404;
+            throw error;
         }
         return await DeliveryRepository.delete(did);
     }
