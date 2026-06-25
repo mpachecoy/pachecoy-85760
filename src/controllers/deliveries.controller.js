@@ -1,4 +1,5 @@
 import { DeliveryService } from "../services/deliveries.service.js";
+import { ORDER_STATUS } from "../constants/index.js";
 
 
 export const getAllOrders = async (req, res) => {
@@ -37,11 +38,11 @@ export const updateOrder = async (req, res) => {
             status: req.body.status,
         }
 
-        if (req.body.status === "assigned") {
+        if (req.body.status === ORDER_STATUS.ASSIGNED) {
             update.assignedAt = new Date();
         }
 
-        if (req.body.status === "delivered") {
+        if (req.body.status === ORDER_STATUS.DELIVERED) {
             update.deliveredAt = new Date();
         }
 
