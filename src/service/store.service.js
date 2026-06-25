@@ -1,4 +1,6 @@
 import { StoreRepository } from "../repository/store.repository.js";
+import { USER_ROLES } from "../constants/index.constants.js";
+import { UserRepository } from "../repository/users.repository.js";
 
 export const StoreService = {
     async getAll() {
@@ -28,26 +30,20 @@ export const StoreService = {
             error.statusCode = 400;
             throw error;
         }
-        const userOwner = await StoreRepository.getById(owner);
+        const userOwner = await UserRepository.getById(owner);
         if (!userOwner) {
             const error = new Error("Usuario no encontrado");
             error.statusCode = 404;
             throw error;
         }
-        if (!userOwner.role === USER_ROLES.STORE) {
+        if (userOwner.role !== USER_ROLES.STORE) {
             const error = new Error("El usuario no es un comercio");
             error.statusCode = 400;
             throw error;
         }
-        if (isActive === undefined) {
-            isActive = false;
-            if (isActive === false) {
-                const error = new Error("El comercio no esta activo");
-                error.statusCode = 400;
-                throw error;
-            }
-        }
-        return await StoreRepository.create(storeData);
+        const activeStatus = isActive ?? false;
+        const storeToCreate = { ...storeData, isActive: activeStatus };
+        return await StoreRepository.create(storeToCreate)
     },
 
     async update(sid, storeUpdateData) {
