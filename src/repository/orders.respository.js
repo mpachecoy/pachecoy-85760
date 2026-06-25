@@ -1,7 +1,7 @@
 import OrderModel from "../models/order.model.js";
 import UserModel from "../models/user.model.js";
 import StoreModel from "../models/store.model.js";
-import { ORDER_STATUS, USER_ROLES } from "../constants/index.js";
+import { ORDER_STATUS, USER_ROLES } from "../constants/index.constants.js";
 
 export const OrderRepository = {
     async getAll() {

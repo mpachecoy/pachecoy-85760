@@ -1,5 +1,5 @@
-import { OrderRepository } from "../repositories/orders.respository.js";
-import { ORDER_STATUS, DELIVERY_PRIORITY } from "../constants/index.js";
+import { OrderRepository } from "../repository/orders.respository.js";
+import { ORDER_STATUS, DELIVERY_PRIORITY } from "../constants/index.constants.js";
 
 
 export const OrderService = {

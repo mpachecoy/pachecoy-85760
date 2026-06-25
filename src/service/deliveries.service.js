@@ -1,4 +1,4 @@
-import { DeliveryRepository } from "../repositories/deliveries.repository.js";
+import { DeliveryRepository } from "../repository/deliveries.repository.js";
 
 export const DeliveryService = {
     async getAll() {

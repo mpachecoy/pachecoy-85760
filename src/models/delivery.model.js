@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { DELIVERY_PRIORITY, ORDER_STATUS } from "../constants/index.js";
+import { DELIVERY_PRIORITY, ORDER_STATUS } from "../constants/index.constants.js";
 
 const deliverySchema = new mongoose.Schema(
   {

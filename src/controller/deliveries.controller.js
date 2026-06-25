@@ -1,5 +1,5 @@
-import { DeliveryService } from "../services/deliveries.service.js";
-import { ORDER_STATUS } from "../constants/index.js";
+import { DeliveryService } from "../service/deliveries.service.js";
+import { ORDER_STATUS } from "../constants/index.constants.js";
 
 
 export const getAllOrders = async (req, res) => {

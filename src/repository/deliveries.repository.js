@@ -1,5 +1,5 @@
 import DeliveryModel from "../models/delivery.model.js";
-import { USER_ROLES } from "../constants/index.js";
+import { USER_ROLES } from "../constants/index.constants.js";
 
 export const DeliveryRepository = {
     async getAll() {
