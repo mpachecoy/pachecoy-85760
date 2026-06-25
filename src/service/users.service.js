@@ -2,7 +2,11 @@ import { UserRepository } from "../repository/users.repository.js";
 
 export const UserService = {
     async getAll() {
-        return await UserRepository.getAll();
+        const users = await UserRepository.getAll();
+        if (!users) {
+            throw new Error("No se encontraron usuarios");
+        }
+        return users;
     },
 
     async getById(uid) {
