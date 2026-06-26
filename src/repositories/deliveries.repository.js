@@ -1,15 +1,15 @@
 import DeliveryModel from "../models/delivery.model.js";
-import { USER_ROLES } from "../constants/index.constants.js";
+import { DELIVERY_REFERENCES } from "../constants/index.constants.js";
 
 export const DeliveryRepository = {
     async getAll() {
-        return await DeliveryModel.find().populate(USER_ROLES.ORDER).populate(USER_ROLES.DRIVER);
+        return await DeliveryModel.find().populate(DELIVERY_REFERENCES.ORDER).populate(DELIVERY_REFERENCES.DRIVER);
     },
 
     async getById(id) {
         return await DeliveryModel.findById(id)
-            .populate(USER_ROLES.ORDER)
-            .populate(USER_ROLES.DRIVER);
+            .populate(DELIVERY_REFERENCES.ORDER)
+            .populate(DELIVERY_REFERENCES.DRIVER);
     },
 
     async create(deliveryData) {

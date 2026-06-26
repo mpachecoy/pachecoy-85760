@@ -1,6 +1,6 @@
-import { StoreRepository } from "../repository/store.repository.js";
+import { StoreRepository } from "../repositories/store.repository.js";
 import { USER_ROLES } from "../constants/index.constants.js";
-import { UserRepository } from "../repository/users.repository.js";
+import { UserRepository } from "../repositories/users.repository.js";
 
 export const StoreService = {
     async getAll() {

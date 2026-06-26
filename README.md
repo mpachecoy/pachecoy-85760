@@ -1,385 +1,235 @@
-## Funcionamiento base de la API
+Backend III - API REST para Gestión de Pedidos y Entregas
 
-ShipNow API es una aplicación backend construida con Node.js, Express y MongoDB.
+Descripción
 
-En su estado base, la API permite trabajar con tres entidades principales:
+API REST desarrollada con Node.js, Express y MongoDB siguiendo una arquitectura por capas para la gestión de usuarios, tiendas, productos, pedidos y entregas.
 
-- Usuarios
-- Comercios
-- Pedidos
+La aplicación permite administrar el ciclo completo de compra y distribución de productos, desde la creación de productos y pedidos hasta la asignación y seguimiento de entregas.
 
-La idea del proyecto es simular una API simple de logística/envíos.
+⸻
 
-Un usuario puede representar a un cliente.
-Un comercio representa el lugar desde donde sale el pedido.
-Un pedido representa una solicitud de envío asociada a un usuario y a un comercio.
+Tecnologías utilizadas
 
-### Flujo principal
+- Node.js
+- Express.js
+- MongoDB
+- Mongoose
+- JWT (JSON Web Token)
+- Passport
+- bcrypt
+- dotenv
 
-El flujo básico de la API es:
+⸻
 
-1. Crear un usuario.
-2. Crear un comercio.
-3. Crear un pedido usando el ID del usuario y el ID del comercio.
-4. Consultar los pedidos.
-5. Actualizar el estado de un pedido.
+Arquitectura del proyecto
 
-El pedido contiene una lista de items, una dirección de entrega, un total calculado y un estado.
+El proyecto implementa una arquitectura por capas para garantizar una correcta separación de responsabilidades.
 
-### Entidades principales
+Flujo de ejecución
 
-### User
+Routes
+↓
+Controllers
+↓
+Services
+↓
+Repositories
+↓
+MongoDB
 
-Representa a un usuario dentro del sistema.
+Responsabilidades
+
+Routes
+
+Definen los endpoints disponibles y derivan las solicitudes al controlador correspondiente.
+
+Controllers
+
+Reciben las peticiones HTTP, extraen parámetros y delegan la lógica al Service.
+
+Services
+
+Contienen la lógica de negocio, validaciones y reglas de la aplicación.
+
+Repositories
+
+Encapsulan el acceso a los datos y la interacción con MongoDB mediante Mongoose.
+
+Models
+
+Definen la estructura de los documentos almacenados en la base de datos.
+
+⸻
+
+Justificación técnica de la separación de capas
+
+La incorporación de la capa Repository permite:
+
+- Separar la lógica de negocio de la persistencia de datos.
+- Reducir el acoplamiento entre Services y MongoDB.
+- Facilitar el mantenimiento del código.
+- Mejorar la reutilización de componentes.
+- Simplificar las pruebas unitarias.
+- Permitir cambios futuros en la tecnología de persistencia sin modificar Controllers ni Services.
+
+⸻
+
+Entidades implementadas
+
+Users
+
+Representa los usuarios del sistema.
 
 Campos principales:
 
-```json
-{
-  "firstName": "Martina",
-  "lastName": "Gómez",
-  "email": "martina@test.com",
-  "password": "123456",
-  "role": "customer"
-}
-```
+- first_name
+- last_name
+- email
+- password
+- role
+- documentType
+- documentNumber
 
 Roles disponibles:
 
-```txt
-admin
-customer
-store
-```
+- admin
+- customer
+- driver
+- store
+- user
 
-En esta versión base, el usuario se usa principalmente como cliente del pedido.
+⸻
 
----
+Stores
 
-### Store
-
-Representa un comercio.
+Representa los comercios registrados.
 
 Campos principales:
 
-```json
-{
-  "name": "Kiosco Centro",
-  "address": "Av. Siempre Viva 742",
-  "owner": "ID_DEL_USUARIO"
-}
-```
+- name
+- owner
+- address
+- phone
+- email
 
-El campo `owner` guarda el ID de un usuario asociado al comercio.
+Relaciones:
 
----
+- owner → User
 
-### Order
+⸻
 
-Representa un pedido o envío.
+Products
+
+Representa los productos ofrecidos por los comercios.
 
 Campos principales:
 
-```json
-{
-  "customer": "ID_DEL_USUARIO",
-  "store": "ID_DEL_COMERCIO",
-  "deliveryAddress": "Av. Siempre Viva 742",
-  "items": [
-    {
-      "name": "Caja mediana",
-      "quantity": 2,
-      "price": 1500
-    }
-  ]
-}
-```
+- title
+- description
+- price
+- stock
+- category
+- store
 
-Cuando se crea un pedido, la API calcula el total automáticamente recorriendo los items.
+Relaciones:
 
-Ejemplo:
+- store → Store
 
-```txt
-2 unidades x $1500 = $3000
-```
+Funcionalidades:
 
-El pedido se crea inicialmente con estado:
+- Crear producto
+- Consultar productos
+- Actualizar producto
+- Eliminar producto
 
-```txt
-created
-```
+⸻
 
-Estados posibles del pedido:
+Orders
 
-```txt
-created
-assigned
-picked_up
-in_transit
-delivered
-cancelled
-```
+Representa los pedidos realizados por los clientes.
 
-### Endpoints disponibles
+Campos principales:
 
-### Health check
+- customer
+- store
+- products
+- total
+- status
 
-Permite verificar que la API está funcionando.
+Relaciones:
 
-```http
-GET /health
-```
+- customer → User
+- store → Store
+- products → Product
 
-Respuesta esperada:
+Estados posibles:
 
-```json
-{
-  "status": "success",
-  "message": "API funcionando correctamente"
-}
-```
+- pending
+- confirmed
+- preparing
+- delivered
+- cancelled
 
----
+⸻
 
-## Users
+Deliveries
 
-### Obtener usuarios
+Representa las entregas asociadas a los pedidos.
 
-```http
-GET /api/users
-```
+Campos principales:
 
-### Obtener usuario por ID
+- order
+- driver
+- status
+- priority
+- assignedAt
+- deliveredAt
 
-```http
-GET /api/users/:uid
-```
+Relaciones:
 
-### Crear usuario
+- order → Order
+- driver → User
 
-```http
-POST /api/users
-```
+Prioridades:
 
-Body de ejemplo:
+- low
+- medium
+- high
 
-```json
-{
-  "firstName": "Martina",
-  "lastName": "Gómez",
-  "email": "martina@test.com",
-  "password": "123456",
-  "role": "customer"
-}
-```
+Estados:
 
-### Actualizar usuario
+- pending
+- assigned
+- delivered
 
-```http
-PUT /api/users/:uid
-```
+⸻
 
-### Eliminar usuario
+Variables de entorno
 
-```http
-DELETE /api/users/:uid
-```
+Crear un archivo .env con las siguientes variables:
 
----
+MONGO_URL=
+JWT_SECRET=
+PORT=
 
-## Stores
+⸻
 
-### Obtener comercios
-
-```http
-GET /api/stores
-```
-
-### Obtener comercio por ID
-
-```http
-GET /api/stores/:sid
-```
-
-### Crear comercio
-
-```http
-POST /api/stores
-```
-
-Body de ejemplo:
-
-```json
-{
-  "name": "Kiosco Centro",
-  "address": "Av. Siempre Viva 742",
-  "owner": "ID_DEL_USUARIO"
-}
-```
-
-### Actualizar comercio
-
-```http
-PUT /api/stores/:sid
-```
-
-### Eliminar comercio
-
-```http
-DELETE /api/stores/:sid
-```
+Instalación
 
----
-
-## Orders
-
-### Obtener pedidos
-
-```http
-GET /api/orders
-```
-
-### Obtener pedido por ID
-
-```http
-GET /api/orders/:oid
-```
-
-### Crear pedido
-
-```http
-POST /api/orders
-```
+npm install
 
-Body de ejemplo:
+Ejecución
 
-```json
-{
-  "customer": "ID_DEL_USUARIO",
-  "store": "ID_DEL_COMERCIO",
-  "deliveryAddress": "Av. Siempre Viva 742",
-  "items": [
-    {
-      "name": "Caja mediana",
-      "quantity": 2,
-      "price": 1500
-    },
-    {
-      "name": "Sobre chico",
-      "quantity": 1,
-      "price": 800
-    }
-  ]
-}
-```
-
-Respuesta esperada:
-
-```json
-{
-  "status": "success",
-  "payload": {
-    "_id": "ID_DEL_PEDIDO",
-    "customer": "ID_DEL_USUARIO",
-    "store": "ID_DEL_COMERCIO",
-    "items": [
-      {
-        "name": "Caja mediana",
-        "quantity": 2,
-        "price": 1500
-      },
-      {
-        "name": "Sobre chico",
-        "quantity": 1,
-        "price": 800
-      }
-    ],
-    "deliveryAddress": "Av. Siempre Viva 742",
-    "total": 3800,
-    "status": "created"
-  }
-}
-```
-
-### Actualizar estado del pedido
-
-```http
-PUT /api/orders/:oid/status
-```
-
-Body de ejemplo:
-
-```json
-{
-  "status": "in_transit"
-}
-```
-
-### Eliminar pedido
-
-```http
-DELETE /api/orders/:oid
-```
-
----
-
-## Formato general de respuestas
-
-Las respuestas exitosas siguen una estructura simple:
-
-```json
-{
-  "status": "success",
-  "payload": {}
-}
-```
-
-Las respuestas de error, en esta versión base, todavía se manejan de forma simple desde las rutas:
-
-```json
-{
-  "status": "error",
-  "message": "Usuario no encontrado"
-}
-```
-
-Más adelante, el proyecto será refactorizado para incorporar una capa centralizada de manejo de errores.
-
-## Estado actual del proyecto
-
-Esta versión base de ShipNow funciona, pero todavía no representa una API completamente profesional.
-
-Actualmente el proyecto tiene:
-
-```txt
-app.js
-server.js
-models
-routes
-controllers
-services
-repositories
-config/db.js
-config/env.js
-```
-
-Todavía no incorpora:
-
-```txt
-middleware global de errores
-logger profesional
-Swagger
-tests automatizados
-Multer
-Docker
-```
-
-Durante el curso, la API será mejorada progresivamente para separar responsabilidades, mejorar la mantenibilidad y acercarse a una estructura más profesional.
-
-Clase 1:
-
-```txt
--> Mejoramos la arquitectura añadiendo "controllers", "services" y "repositories" para separar responsabilidades.
-
--> Añadimos el archivo ./config/env.js para centralizar la configuración de variables de entorno.
-```
+Modo desarrollo:
+
+npm run dev
+
+Modo producción:
+
+npm start
+
+⸻
+
+Autor
+
+Carlos Martin Pachecoy

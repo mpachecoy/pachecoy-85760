@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getAllStores, getStoreById, createStore, updateStore, deleteStore } from "../controller/store.controller.js";
+import { getAllStores, getStoreById, createStore, updateStore, deleteStore } from "../controllers/store.controller.js";
 
 const router = Router();
 

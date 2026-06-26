@@ -1,4 +1,4 @@
-import { OrderRepository } from "../repository/orders.respository.js";
+import { OrderRepository } from "../repositories/orders.repository.js";
 import { ORDER_STATUS, DELIVERY_PRIORITY } from "../constants/index.constants.js";
 
 
