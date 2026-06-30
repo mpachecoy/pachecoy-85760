@@ -55,7 +55,7 @@ export const deleteDelivery = async (req, res) => {
             return res.status(400).json({ status: "error", message: "ID de entrega no proporcionado" });
         }
         const delivery = await DeliveryService.delete(did);
-        res.status(200).json({ status: "success", payload: delivery });
+        res.status(200).json({ status: "success", message: "Entrega eliminada correctamente", payload: delivery });
     } catch (error) {
         res.status(400).json({ status: "error", message: error.message });
     }

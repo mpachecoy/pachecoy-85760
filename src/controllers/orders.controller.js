@@ -53,7 +53,7 @@ export const deleteOrder = async (req, res) => {
             return res.status(400).json({ status: "error", message: "ID no proporcionado" });
         }
         const order = await OrderService.delete(oid);
-        res.json({ status: "success", payload: order });
+        res.json({ status: "success", message: "Pedido eliminado correctamente", payload: order });
     } catch (error) {
         res.status(400).json({ status: "error", message: error.message });
     }

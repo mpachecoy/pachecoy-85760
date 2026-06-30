@@ -1,4 +1,4 @@
-import { ProductRepository } from "../repositories/product.repository.js";
+import { ProductRepository } from "../repositories/products.repository.js";
 
 export const ProductService = {
     async getAll() {
@@ -22,8 +22,8 @@ export const ProductService = {
     },
 
     async create(productData) {
-        const { title, description, price, stock, category, store, order } = productData;
-        if (!title || !description || !price || !stock || !category || !store || !order) {
+        const { title, description, price, stock, category } = productData;
+        if (!title || !description || !price || !stock || !category) {
             const error = new Error("Datos obligatorios no proporcionados");
             error.statusCode = 400;
             throw error;

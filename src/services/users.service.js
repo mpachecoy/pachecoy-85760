@@ -1,4 +1,5 @@
 import { UserRepository } from "../repositories/users.repository.js";
+import { USER_ROLES } from "../constants/index.constants.js";
 
 export const UserService = {
     async getAll() {
@@ -22,7 +23,7 @@ export const UserService = {
     },
 
     async create(userData) {
-        const { firstName, lastName, email, password, role, isAvailable, documents } = userData;
+        const { firstName, lastName, email, password, role } = userData;
         if (!firstName || !lastName || !email || !password) {
             const error = new Error("Datos obligatorios no proporcionados");
             error.statusCode = 400;
@@ -35,7 +36,7 @@ export const UserService = {
             throw error;
         }
         if (role) {
-            const validRoles = [USER_ROLES.ADMIN, USER_ROLES.CUSTOMER, USER_ROLES.DRIVER, USER_ROLES.STORE];
+            const validRoles = [USER_ROLES.ADMIN, USER_ROLES.CUSTOMER, USER_ROLES.DRIVER, USER_ROLES.STORE, USER_ROLES.USER];
             if (!validRoles.includes(role)) {
                 const error = new Error("Rol inválido");
                 error.statusCode = 400;
@@ -63,7 +64,7 @@ export const UserService = {
             }
         }
         if (role) {
-            const validRoles = [USER_ROLES.ADMIN, USER_ROLES.CUSTOMER, USER_ROLES.DRIVER, USER_ROLES.STORE];
+            const validRoles = [USER_ROLES.ADMIN, USER_ROLES.CUSTOMER, USER_ROLES.DRIVER, USER_ROLES.STORE, USER_ROLES.USER];
             if (!validRoles.includes(role)) {
                 const error = new Error("Rol inválido");
                 error.statusCode = 400;

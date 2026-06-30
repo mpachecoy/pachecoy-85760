@@ -24,13 +24,11 @@ const ProductSchema = new mongoose.Schema(
         },
         store: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "Store",
-            required: true
+            ref: "Store"
         },
         order: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "Order",
-            required: true
+            ref: "Order"
         }
     },
     {

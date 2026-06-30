@@ -1,4 +1,4 @@
-import { StoreRepository } from "../repositories/store.repository.js";
+import { StoreRepository } from "../repositories/stores.repository.js";
 import { USER_ROLES } from "../constants/index.constants.js";
 import { UserRepository } from "../repositories/users.repository.js";
 

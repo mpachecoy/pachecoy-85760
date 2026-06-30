@@ -1,10 +1,10 @@
-export const USER_ROLES = Object.freeze({
+export const USER_ROLES = {
     ADMIN: 'admin',
     CUSTOMER: 'customer',
     DRIVER: 'driver',
     STORE: 'store',
     USER: 'user'
-});
+};
 
 
 export const ORDER_STATUS = Object.freeze({

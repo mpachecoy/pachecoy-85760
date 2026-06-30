@@ -54,7 +54,7 @@ export const deleteUser = async (req, res) => {
             return res.status(400).json({ status: "error", message: "ID no proporcionado" });
         }
         const user = await UserService.delete(uid);
-        res.json({ status: "success", payload: user });
+        res.json({ status: "success", message: "Usuario eliminado correctamente", payload: user });
     } catch (error) {
         res.status(400).json({ status: "error", message: error.message });
     }

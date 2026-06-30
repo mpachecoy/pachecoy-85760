@@ -72,6 +72,9 @@ export const ProductController = {
     async delete(req, res) {
         try {
             const { pid } = req.params;
+            if (!pid) {
+                throw new Error("ID de producto no proporcionado");
+            }
             const product = await ProductService.delete(pid);
             res.status(200).json({
                 status: "success",

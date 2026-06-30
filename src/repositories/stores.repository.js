@@ -1,4 +1,5 @@
 import StoreModel from "../models/store.model.js";
+import { USER_ROLES } from "../constants/index.constants.js";
 
 export const StoreRepository = {
     async getAll() {

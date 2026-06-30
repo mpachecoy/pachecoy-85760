@@ -23,6 +23,7 @@ export const OrderService = {
         return order;
     },
 
+
     async create(orderData) {
         const { customer, store, items, deliveryAddress, priority } = orderData;
         if (!customer || !store || !items || !deliveryAddress) {

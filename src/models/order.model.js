@@ -1,11 +1,11 @@
 import mongoose from "mongoose";
 import { ORDER_STATUS, DELIVERY_PRIORITY } from "../constants/index.constants.js";
 
-
 const orderItemSchema = new mongoose.Schema(
   {
-    name: {
-      type: String,
+    product: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Product",
       required: true
     },
     quantity: {
@@ -17,9 +17,7 @@ const orderItemSchema = new mongoose.Schema(
       required: true
     }
   },
-  {
-    _id: false
-  }
+  { _id: false }
 );
 
 const orderSchema = new mongoose.Schema(

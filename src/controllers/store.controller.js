@@ -54,7 +54,7 @@ export const deleteStore = async (req, res) => {
             return res.status(400).json({ status: "error", message: "ID de comercio no proporcionado" });
         }
         const store = await StoreService.delete(sid);
-        res.json({ status: "success", payload: store });
+        res.json({ status: "success", message: "Comercio eliminado correctamente", payload: store });
     } catch (error) {
         res.status(400).json({ status: "error", message: error.message });
     }
