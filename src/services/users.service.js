@@ -1,5 +1,6 @@
 import { UserRepository } from "../repositories/users.repository.js";
 import { USER_ROLES } from "../constants/index.constants.js";
+import bcrypt from "bcrypt";
 
 export const UserService = {
     async getAll() {
@@ -43,7 +44,15 @@ export const UserService = {
                 throw error;
             }
         }
-        const user = await UserRepository.create(userData);
+
+        const newUser = {
+            firstName,
+            lastName,
+            email,
+            password: await bcrypt.hash(password, 10),
+            role,
+        }
+        const user = await UserRepository.create(newUser);
         return user;
     },
 

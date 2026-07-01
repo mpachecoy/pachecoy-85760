@@ -1,17 +1,17 @@
 import { faker } from "@faker-js/faker";
 import { ORDER_STATUS, DELIVERY_PRIORITY } from "../constants/index.constants.js";
 
-export const generateMockOrder = (customerId, storeId) => {
+export const generateMockOrder = () => {
     const item = [{
-        productId: faker.string.uuid(),
+        product: faker.database.mongodbObjectId(),
         quantity: faker.number.int({ min: 1, max: 10 }),
         price: faker.number.float({ min: 1, max: 1000, fractionDigits: 2 })
     }];
     const total = item.reduce((acc, item) => acc + item.price * item.quantity, 0);
 
     return {
-        customer: customerId,
-        store: storeId,
+        customer: faker.database.mongodbObjectId(),
+        store: faker.database.mongodbObjectId(),
         items: item,
         deliveryAddress: faker.address.streetAddress(),
         total: total,

@@ -1,13 +1,12 @@
 import { faker } from "@faker-js/faker";
-import { USER_ROLES } from "../constants/index.constants.js";
+import { ORDER_STATUS, DELIVERY_PRIORITY } from "../constants/index.constants.js";
 
 export const generateMockDelivery = () => {
     return {
-        userId: faker.string.uuid(),
-        storeId: faker.string.uuid(),
-        orderId: faker.string.uuid(),
-        deliveryId: faker.string.uuid(),
-        status: faker.helpers.arrayElement(["pending", "completed", "cancelled"])
+        order: faker.database.mongodbObjectId(),
+        driver: faker.database.mongodbObjectId(),
+        status: faker.helpers.arrayElement([ORDER_STATUS.CREATED, ORDER_STATUS.ASSIGNED, ORDER_STATUS.PICKED_UP, ORDER_STATUS.IN_TRANSIT, ORDER_STATUS.DELIVERED, ORDER_STATUS.CANCELLED]),
+        priority: faker.helpers.arrayElement([DELIVERY_PRIORITY.LOW, DELIVERY_PRIORITY.NORMAL, DELIVERY_PRIORITY.HIGH])
     };
 }
 
