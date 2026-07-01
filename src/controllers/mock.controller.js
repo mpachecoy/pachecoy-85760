@@ -10,7 +10,6 @@ export const getMockUsers = async (req, res) => {
     }
 }
 
-
 export const getMockStores = async (req, res) => {
     try {
         const n = req.params.n;
@@ -51,3 +50,14 @@ export const getMockDeliveries = async (req, res) => {
         res.status(500).json({ status: "error", message: error.message });
     }
 }
+
+export const saveMockUsers = async (req, res) => {
+    try {
+        const n = req.params.n;
+        const users = await mockDataService.saveUsers(n);
+        res.json({ status: "success", payload: users });
+    } catch (error) {
+        res.status(500).json({ status: "error", message: error.message });
+    }
+}
+

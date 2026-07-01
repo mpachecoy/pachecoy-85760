@@ -1,14 +1,23 @@
 import { faker } from "@faker-js/faker";
-import { USER_ROLES } from "../constants/index.constants.js";
+import { ORDER_STATUS, DELIVERY_PRIORITY } from "../constants/index.constants.js";
 
-export const generateMockOrder = () => {
-    return {
-        userId: faker.string.uuid(),
-        storeId: faker.string.uuid(),
+export const generateMockOrder = (customerId, storeId) => {
+    const item = [{
         productId: faker.string.uuid(),
         quantity: faker.number.int({ min: 1, max: 10 }),
-        total: faker.number.float({ min: 1, max: 1000, fractionDigits: 2 }),
-        status: faker.helpers.arrayElement(["pending", "completed", "cancelled"])
+        price: faker.number.float({ min: 1, max: 1000, fractionDigits: 2 })
+    }];
+    const total = item.reduce((acc, item) => acc + item.price * item.quantity, 0);
+
+    return {
+        customer: customerId,
+        store: storeId,
+        items: item,
+        deliveryAddress: faker.address.streetAddress(),
+        total: total,
+        status: faker.helpers.arrayElement([ORDER_STATUS.CREATED, ORDER_STATUS.ASSIGNED, ORDER_STATUS.PICKED_UP, ORDER_STATUS.IN_TRANSIT, ORDER_STATUS.DELIVERED, ORDER_STATUS.CANCELLED]),
+        priority: faker.helpers.arrayElement([DELIVERY_PRIORITY.LOW, DELIVERY_PRIORITY.NORMAL, DELIVERY_PRIORITY.HIGH]),
+        proof: faker.datatype.boolean()
     };
 }
 

@@ -6,6 +6,7 @@ import ordersRouter from "./routes/orders.router.js";
 import deliveriesRouter from "./routes/deliveries.router.js";
 import productsRouter from "./routes/products.router.js";
 import mockRouter from "./routes/mock.router.js";
+import { env } from "./config/env.config.js";
 
 const app = express();
 
@@ -31,7 +32,10 @@ app.use("/api/stores", storesRouter);
 app.use("/api/orders", ordersRouter);
 app.use("/api/deliveries", deliveriesRouter);
 app.use("/api/products", productsRouter);
-app.use("/api/mocks", mockRouter)
+
+if (env.nodeEnv === "development") {
+  app.use("/api/mocks", mockRouter);
+};
 
 app.use((req, res) => {
   res.status(404).json({
