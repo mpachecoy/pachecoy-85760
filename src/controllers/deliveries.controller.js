@@ -2,7 +2,7 @@ import { DeliveryService } from "../services/deliveries.service.js";
 import { successResponse } from "../utils/api.response.js";
 
 
-export const getAllDeliveries = async (req, res) => {
+export const getAllDeliveries = async (req, res, next) => {
     try {
         const deliveries = await DeliveryService.getAll();
         return successResponse(res, {
@@ -14,7 +14,7 @@ export const getAllDeliveries = async (req, res) => {
     }
 }
 
-export const getDeliveryById = async (req, res) => {
+export const getDeliveryById = async (req, res, next) => {
     try {
         const { did } = req.params;
         if (!did) {
@@ -30,7 +30,7 @@ export const getDeliveryById = async (req, res) => {
     }
 }
 
-export const createDelivery = async (req, res) => {
+export const createDelivery = async (req, res, next) => {
     try {
         const body = req.body;
         const delivery = await DeliveryService.create(body);
@@ -44,7 +44,7 @@ export const createDelivery = async (req, res) => {
     }
 }
 
-export const updateDelivery = async (req, res) => {
+export const updateDelivery = async (req, res, next) => {
     try {
         const updateDelivery = req.body;
         const { did } = req.params;
@@ -62,7 +62,7 @@ export const updateDelivery = async (req, res) => {
     }
 }
 
-export const deleteDelivery = async (req, res) => {
+export const deleteDelivery = async (req, res, next) => {
     try {
         const { did } = req.params;
         if (!did) {

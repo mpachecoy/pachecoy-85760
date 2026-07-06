@@ -1,6 +1,6 @@
 export const ERROR_DICTIONARY = {
     VALIDATION_ERROR: {
-        statusCode: 500,
+        statusCode: 400,
         message: "Error de validacion"
     },
 
@@ -128,4 +128,31 @@ export const ERROR_DICTIONARY = {
         statusCode: 416,
         message: "Rango no satisfecho"
     },
+
+    MISSING_REQUIRED_DATA: {
+        statusCode: 400,
+        message: "Datos requeridos faltantes"
+    },
+
+    INVALID_ROLE: {
+        statusCode: 400,
+        message: "Rol inválido"
+    },
+
+    STORE_NOT_ACTIVE: {
+        statusCode: 400,
+        message: "Tienda no activa"
+    },
+
+    INVALID_STATUS: {
+        statusCode: 400,
+        message: "Estado inválido"
+    },
+
+    INVALID_ITEMS: {
+        statusCode: 400,
+        message: "Items inválidos"
+    },
+
+
 }

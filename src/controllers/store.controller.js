@@ -67,7 +67,7 @@ export const updateStore = async (req, res, next) => {
     }
 };
 
-export const deleteStore = async (req, res) => {
+export const deleteStore = async (req, res, next) => {
     try {
         const { sid } = req.params;
         if (!sid) {

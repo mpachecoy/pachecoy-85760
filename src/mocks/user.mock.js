@@ -8,7 +8,7 @@ export const mockUser = () => {
         lastName: faker.person.lastName(),
         email: faker.internet.email(),
         password: bcrypt.hashSync(faker.internet.password(), 10),
-        role: faker.helpers.arrayElement([USER_ROLES.CUSTOMER, USER_ROLES.DRIVER, USER_ROLES.STORE_OWNER, USER_ROLES.ADMIN]) || USER_ROLES.CUSTOMER
+        role: faker.helpers.arrayElement([USER_ROLES.CUSTOMER, USER_ROLES.DRIVER, USER_ROLES.OWNER, USER_ROLES.ADMIN]) || USER_ROLES.CUSTOMER
     };
 }
 

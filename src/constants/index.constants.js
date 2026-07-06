@@ -3,7 +3,8 @@ export const USER_ROLES = {
     CUSTOMER: 'customer',
     DRIVER: 'driver',
     STORE: 'store',
-    USER: 'user'
+    USER: 'user',
+    OWNER: 'owner'
 };
 
 
@@ -13,7 +14,12 @@ export const ORDER_STATUS = Object.freeze({
     PICKED_UP: 'picked_up',
     IN_TRANSIT: 'in_transit',
     DELIVERED: 'delivered',
-    CANCELLED: 'cancelled'
+    CANCELLED: 'cancelled',
+    PENDING: 'pending',
+    REJECTED: 'rejected',
+    CONFIRMED: 'confirmed',
+    IN_PROGRESS: 'in_progress',
+    COMPLETED: 'completed',
 });
 
 

@@ -1,7 +1,7 @@
 import { ProductService } from "../services/product.service.js";
 import { successResponse } from "../utils/api.response.js";
 
-export const getAllProducts = async (req, res) => {
+export const getAllProducts = async (req, res, next) => {
     try {
         const products = await ProductService.getAll();
         return successResponse(res, {
@@ -13,7 +13,7 @@ export const getAllProducts = async (req, res) => {
     }
 }
 
-export const getProductById = async (req, res) => {
+export const getProductById = async (req, res, next) => {
     try {
         const { pid } = req.params;
         const product = await ProductService.getById(pid);
@@ -26,7 +26,7 @@ export const getProductById = async (req, res) => {
     }
 }
 
-export const createProduct = async (req, res) => {
+export const createProduct = async (req, res, next) => {
     try {
         const productData = req.body;
         const product = await ProductService.create(productData);
@@ -40,7 +40,7 @@ export const createProduct = async (req, res) => {
     }
 }
 
-export const updateProduct = async (req, res) => {
+export const updateProduct = async (req, res, next) => {
     try {
         const { pid } = req.params;
         const productData = req.body;
@@ -54,7 +54,7 @@ export const updateProduct = async (req, res) => {
     }
 }
 
-export const deleteProduct = async (req, res) => {
+export const deleteProduct = async (req, res, next) => {
     try {
         const { pid } = req.params;
         if (!pid) {

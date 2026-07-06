@@ -1,235 +1,273 @@
-Backend III - API REST para Gestión de Pedidos y Entregas
+# ShipNow API — Backend III
 
-Descripción
+API REST desarrollada con Node.js, Express y MongoDB (Mongoose) siguiendo una arquitectura por capas para la gestión de usuarios, comercios, productos, pedidos y entregas.
 
-API REST desarrollada con Node.js, Express y MongoDB siguiendo una arquitectura por capas para la gestión de usuarios, tiendas, productos, pedidos y entregas.
+Permite administrar el ciclo completo de compra y distribución: creación de productos y pedidos, asignación de entregas a repartidores y seguimiento de su estado.
 
-La aplicación permite administrar el ciclo completo de compra y distribución de productos, desde la creación de productos y pedidos hasta la asignación y seguimiento de entregas.
+---
 
-⸻
+## Tecnologías utilizadas
 
-Tecnologías utilizadas
-
-- Node.js
-- Express.js
-- MongoDB
-- Mongoose
-- JWT (JSON Web Token)
-- Passport
-- bcrypt
+- Node.js + Express.js
+- MongoDB + Mongoose
+- Passport (dependencia instalada, integración de autenticación pendiente)
+- bcrypt (hash de contraseñas)
+- cors
 - dotenv
+- @faker-js/faker (generación de datos mock, solo en desarrollo)
 
-⸻
+---
 
-Arquitectura del proyecto
+## Arquitectura del proyecto
 
-El proyecto implementa una arquitectura por capas para garantizar una correcta separación de responsabilidades.
+```
+Routes → Controllers → Services → Repositories → MongoDB
+```
 
-Flujo de ejecución
+| Capa             | Responsabilidad                                                                                                                       |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| **Routes**       | Definen los endpoints disponibles y los derivan al controller correspondiente.                                                        |
+| **Controllers**  | Reciben la petición HTTP, extraen `params`/`body` y delegan la lógica al Service. No contienen lógica de negocio.                     |
+| **Services**     | Contienen las validaciones y reglas de negocio. Son la única capa que decide qué error de negocio lanzar.                             |
+| **Repositories** | Encapsulan el acceso a datos vía Mongoose (`find`, `create`, `findByIdAndUpdate`, etc.), aislando a los Services de la base de datos. |
+| **Models**       | Definen los schemas de Mongoose y las validaciones a nivel de documento (`required`, `enum`, `unique`).                               |
 
-Routes
-↓
-Controllers
-↓
-Services
-↓
-Repositories
-↓
-MongoDB
+La capa Repository reduce el acoplamiento entre Services y MongoDB, facilita el testing y deja la puerta abierta a cambiar el motor de persistencia sin tocar Controllers ni Services.
 
-Responsabilidades
+Todos los controllers están envueltos con un helper `asyncHandler` (ver más abajo), por lo que **no necesitan `try/catch` propio**: cualquier error (de validación, de Mongoose, o inesperado) viaja automáticamente hasta el middleware central de errores.
 
-Routes
+---
 
-Definen los endpoints disponibles y derivan las solicitudes al controlador correspondiente.
+## Manejo de errores
 
-Controllers
+El manejo de errores es centralizado y está compuesto por cuatro piezas, dentro de `src/utils` y `src/middelwares`:
 
-Reciben las peticiones HTTP, extraen parámetros y delegan la lógica al Service.
+### 1. `errors.dictionary.js`
 
-Services
+Diccionario único con todos los códigos de error posibles de la aplicación, cada uno con su `statusCode` HTTP y su mensaje por defecto en español (`USER_NOT_FOUND`, `MISSING_REQUIRED_DATA`, `INVALID_STATUS`, `STORE_NOT_ACTIVE`, `VALIDATION_ERROR`, etc). Agregar un nuevo tipo de error a la aplicación implica agregar una entrada acá.
 
-Contienen la lógica de negocio, validaciones y reglas de la aplicación.
+### 2. `custom.error.js` — `CustomError`
 
-Repositories
+Clase que extiende `Error`. Al instanciarla con un código del diccionario arma automáticamente el `statusCode`, el `code` y el `message`, y admite un campo `details` opcional para adjuntar información adicional (por ejemplo, la lista de campos que fallaron una validación).
 
-Encapsulan el acceso a los datos y la interacción con MongoDB mediante Mongoose.
+```js
+throw new CustomError("STORE_NOT_ACTIVE");
+// equivalente y más habitual dentro de los Services:
+throw createError("STORE_NOT_ACTIVE");
+```
 
-Models
+### 3. `async.handler.js` — `asyncHandler`
 
-Definen la estructura de los documentos almacenados en la base de datos.
+Wrapper que envuelve cada función de controller. Captura cualquier excepción síncrona o rechazo de promesa y lo reenvía a `next(error)` automáticamente:
 
-⸻
+```js
+export const getUserById = asyncHandler(async (req, res) => {
+  const user = await UserService.getById(req.params.uid);
+  return successResponse(res, { payload: user });
+});
+```
 
-Justificación técnica de la separación de capas
+Esto elimina la necesidad (y el riesgo) de escribir `try { ... } catch (error) { next(error) }` en cada controller.
 
-La incorporación de la capa Repository permite:
+### 4. `error.middleware.js` — `errorHandler` / `notFoundHandler`
 
-- Separar la lógica de negocio de la persistencia de datos.
-- Reducir el acoplamiento entre Services y MongoDB.
-- Facilitar el mantenimiento del código.
-- Mejorar la reutilización de componentes.
-- Simplificar las pruebas unitarias.
-- Permitir cambios futuros en la tecnología de persistencia sin modificar Controllers ni Services.
+Middleware final de la app (`app.use(errorHandler)`), que:
 
-⸻
+- Si el error ya es un `CustomError` (lanzado por un Service o Controller), lo usa tal cual.
+- Si es un `mongoose.Error.CastError` (ID con formato inválido, ej. `/api/users/123`) lo traduce a `400 INVALID_ID`.
+- Si es un `mongoose.Error.ValidationError` (falló un `required`/`enum` del schema) lo traduce a `400 VALIDATION_ERROR` con el detalle de cada campo.
+- Si es un error de clave duplicada de Mongo (`code 11000`, ej. email repetido) lo traduce a `409 CONFLICT`.
+- Si el body de la request no es JSON válido, responde `400 BAD_REQUEST`.
+- Cualquier otro error cae en `500 INTERNAL_SERVER_ERROR`.
 
-Entidades implementadas
+Todo error con `statusCode >= 500` se loguea completo (con stack trace) del lado del servidor vía `console.error`, sin exponer detalles internos al cliente.
 
-Users
+`notFoundHandler` se registra después de todas las rutas y arma un `404 ROUTE_NOT_FOUND` para cualquier endpoint que no exista.
 
-Representa los usuarios del sistema.
+### Formato de respuesta
 
-Campos principales:
+Éxito:
 
-- first_name
-- last_name
-- email
-- password
-- role
-- documentType
-- documentNumber
+```json
+{ "status": "success", "message": "...", "payload": {} }
+```
 
-Roles disponibles:
+Error:
 
-- admin
-- customer
-- driver
-- store
-- user
+```json
+{
+  "status": "error",
+  "error": "USER_NOT_FOUND",
+  "message": "Usuario no encontrado"
+}
+```
 
-⸻
+---
 
-Stores
+## Entidades implementadas
 
-Representa los comercios registrados.
+### Users (`/api/users`)
 
-Campos principales:
+| Campo       | Tipo    | Notas                                                                     |
+| ----------- | ------- | ------------------------------------------------------------------------- |
+| firstName   | String  | requerido                                                                 |
+| lastName    | String  | requerido                                                                 |
+| email       | String  | requerido, único                                                          |
+| password    | String  | requerido, se guarda hasheado con bcrypt                                  |
+| role        | String  | enum: `admin`, `customer`, `driver`, `store`, `user` — default `customer` |
+| isAvailable | Boolean | default `false`                                                           |
+| documents   | Array   | default `[]`                                                              |
+
+### Stores (`/api/stores`)
+
+| Campo    | Tipo            | Notas                                              |
+| -------- | --------------- | -------------------------------------------------- |
+| name     | String          | requerido                                          |
+| address  | String          | requerido                                          |
+| owner    | ObjectId → User | requerido, debe ser un usuario con `role: "store"` |
+| isActive | Boolean         | default `true`                                     |
+
+Un comercio inactivo (`isActive: false`) no puede actualizarse (`STORE_NOT_ACTIVE`).
+
+### Products (`/api/products`)
+
+| Campo       | Tipo             | Notas     |
+| ----------- | ---------------- | --------- |
+| title       | String           | requerido |
+| description | String           | requerido |
+| price       | Number           | requerido |
+| stock       | Number           | requerido |
+| category    | String           | requerido |
+| store       | ObjectId → Store | opcional  |
+| order       | ObjectId → Order | opcional  |
+
+### Orders (`/api/orders`)
 
-- name
-- owner
-- address
-- phone
-- email
+| Campo           | Tipo                             | Notas                                            |
+| --------------- | -------------------------------- | ------------------------------------------------ |
+| customer        | ObjectId → User                  | requerido                                        |
+| store           | ObjectId → Store                 | requerido                                        |
+| items           | `[{ product, quantity, price }]` | requerido, al menos 1 item                       |
+| deliveryAddress | String                           | requerido                                        |
+| total           | Number                           | calculado automáticamente (`Σ price * quantity`) |
+| status          | String                           | enum de `ORDER_STATUS` — default `created`       |
+| priority        | String                           | enum de `DELIVERY_PRIORITY` — default `normal`   |
+| proof           | Object                           | default `null`                                   |
 
-Relaciones:
+### Deliveries (`/api/deliveries`)
 
-- owner → User
+| Campo       | Tipo             | Notas                                          |
+| ----------- | ---------------- | ---------------------------------------------- |
+| order       | ObjectId → Order | requerido                                      |
+| driver      | ObjectId → User  | opcional                                       |
+| status      | String           | enum de `ORDER_STATUS` — default `created`     |
+| priority    | String           | enum de `DELIVERY_PRIORITY` — default `normal` |
+| assignedAt  | Date             | se completa al pasar a `assigned`              |
+| deliveredAt | Date             | se completa al pasar a `delivered`             |
 
-⸻
+### Constantes compartidas (`src/constants/index.constants.js`)
 
-Products
+- **USER_ROLES**: `admin`, `customer`, `driver`, `store`, `user`
+- **ORDER_STATUS**: `created`, `assigned`, `picked_up`, `in_transit`, `delivered`, `cancelled`
+- **DELIVERY_PRIORITY**: `low`, `normal`, `high`
+- **DOCUMENT_TYPES**: `user_document`, `driver_license`, `delivery_proof`
 
-Representa los productos ofrecidos por los comercios.
+---
 
-Campos principales:
+## Endpoints
 
-- title
-- description
-- price
-- stock
-- category
-- store
+### Users — `/api/users`
 
-Relaciones:
+| Método | Ruta    | Descripción            |
+| ------ | ------- | ---------------------- |
+| GET    | `/`     | Listar usuarios        |
+| GET    | `/:uid` | Obtener usuario por ID |
+| POST   | `/`     | Crear usuario          |
+| PUT    | `/:uid` | Actualizar usuario     |
+| DELETE | `/:uid` | Eliminar usuario       |
 
-- store → Store
+### Stores — `/api/stores`
 
-Funcionalidades:
+Mismos verbos que Users, con `:sid`.
 
-- Crear producto
-- Consultar productos
-- Actualizar producto
-- Eliminar producto
+### Products — `/api/products`
 
-⸻
+Mismos verbos que Users, con `:pid`.
 
-Orders
+### Orders — `/api/orders`
 
-Representa los pedidos realizados por los clientes.
+| Método | Ruta           | Descripción                  |
+| ------ | -------------- | ---------------------------- |
+| GET    | `/`            | Listar pedidos               |
+| GET    | `/:oid`        | Obtener pedido por ID        |
+| POST   | `/`            | Crear pedido                 |
+| PUT    | `/:oid/status` | Actualizar estado del pedido |
+| DELETE | `/:oid`        | Eliminar pedido              |
 
-Campos principales:
+### Deliveries — `/api/deliveries`
 
-- customer
-- store
-- products
-- total
-- status
+| Método | Ruta           | Descripción            |
+| ------ | -------------- | ---------------------- |
+| GET    | `/`            | Listar entregas        |
+| GET    | `/:did`        | Obtener entrega por ID |
+| POST   | `/`            | Crear entrega          |
+| PUT    | `/:did/status` | Actualizar entrega     |
+| DELETE | `/:did`        | Eliminar entrega       |
 
-Relaciones:
+### Mocks — `/api/mocks` (solo si `NODE_ENV=development`)
 
-- customer → User
-- store → Store
-- products → Product
+| Método | Ruta             | Descripción                                          |
+| ------ | ---------------- | ---------------------------------------------------- |
+| GET    | `/users/:n`      | Generar `n` usuarios falsos (no se guardan)          |
+| GET    | `/stores/:n`     | Generar `n` comercios falsos                         |
+| GET    | `/products/:n`   | Generar `n` productos falsos                         |
+| GET    | `/orders/:n`     | Generar `n` pedidos falsos                           |
+| GET    | `/deliveries/:n` | Generar `n` entregas falsas                          |
+| POST   | `/users/:n`      | Generar y **guardar** `n` usuarios falsos en la base |
 
-Estados posibles:
+### Utilitarios
 
-- pending
-- confirmed
-- preparing
-- delivered
-- cancelled
+- `GET /` — status de la API
+- `GET /health` — healthcheck
 
-⸻
+---
 
-Deliveries
+## Variables de entorno
 
-Representa las entregas asociadas a los pedidos.
+Crear un archivo `.env` en la raíz (ver `.env.example`):
 
-Campos principales:
+```
+PORT=8080
+MONGODB_URI=mongodb://localhost:27017/shipnow
+NODE_ENV=development
+```
 
-- order
-- driver
-- status
-- priority
-- assignedAt
-- deliveredAt
+Las tres son obligatorias: la app no arranca si falta alguna (`env.config.js` valida esto al inicio).
 
-Relaciones:
+---
 
-- order → Order
-- driver → User
+## Instalación y ejecución
 
-Prioridades:
-
-- low
-- medium
-- high
-
-Estados:
-
-- pending
-- assigned
-- delivered
-
-⸻
-
-Variables de entorno
-
-Crear un archivo .env con las siguientes variables:
-
-MONGO_URL=
-JWT_SECRET=
-PORT=
-
-⸻
-
-Instalación
-
+```bash
 npm install
 
-Ejecución
-
-Modo desarrollo:
-
+# modo desarrollo (con nodemon)
 npm run dev
 
-Modo producción:
-
+# modo producción
 npm start
+```
 
-⸻
+---
 
-Autor
+## Estado del proyecto / próximos pasos
 
-Carlos Martin Pachecoy
+- Autenticación con Passport (Local/JWT) aún no integrada en las rutas de esta API (la dependencia está instalada pero no conectada a `app.js`).
+- No hay middlewares de autorización por rol todavía.
+- Los mocks (`/api/mocks`) están pensados solo para poblar datos de prueba en desarrollo; se desactivan automáticamente si `NODE_ENV` no es `development`.
+
+---
+
+## Autor
+
+Carlos Martín Pachecoy

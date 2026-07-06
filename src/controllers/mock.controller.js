@@ -1,7 +1,7 @@
 import { mockDataService } from "../services/mock.service.js";
 import { successResponse } from "../utils/api.response.js";
 
-export const getMockUsers = async (req, res) => {
+export const getMockUsers = async (req, res, next) => {
     try {
         const n = req.params.n;
         const users = await mockDataService.createUser(n);
@@ -14,7 +14,7 @@ export const getMockUsers = async (req, res) => {
     }
 }
 
-export const getMockStores = async (req, res) => {
+export const getMockStores = async (req, res, next) => {
     try {
         const n = req.params.n;
         const stores = await mockDataService.createStores(n);
@@ -27,7 +27,7 @@ export const getMockStores = async (req, res) => {
     }
 }
 
-export const getMockProducts = async (req, res) => {
+export const getMockProducts = async (req, res, next) => {
     try {
         const n = req.params.n;
         const products = await mockDataService.createProducts(n);
@@ -40,7 +40,7 @@ export const getMockProducts = async (req, res) => {
     }
 }
 
-export const getMockOrders = async (req, res) => {
+export const getMockOrders = async (req, res, next) => {
     try {
         const n = req.params.n;
         const orders = await mockDataService.createOrders(n);
@@ -53,7 +53,7 @@ export const getMockOrders = async (req, res) => {
     }
 }
 
-export const getMockDeliveries = async (req, res) => {
+export const getMockDeliveries = async (req, res, next) => {
     try {
         const n = req.params.n;
         const deliveries = await mockDataService.createDeliveries(n);
@@ -66,7 +66,7 @@ export const getMockDeliveries = async (req, res) => {
     }
 }
 
-export const saveMockUsers = async (req, res) => {
+export const saveMockUsers = async (req, res, next) => {
     try {
         const n = req.params.n;
         const users = await mockDataService.saveUsers(n);

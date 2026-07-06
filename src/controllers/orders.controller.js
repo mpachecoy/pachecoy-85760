@@ -1,7 +1,7 @@
 import { OrderService } from "../services/orders.service.js";
 import { successResponse } from "../utils/api.response.js";
 
-export const getAllOrders = async (req, res) => {
+export const getAllOrders = async (req, res, next) => {
     try {
         const orders = await OrderService.getAll();
         return successResponse(res, {
@@ -13,7 +13,7 @@ export const getAllOrders = async (req, res) => {
     }
 }
 
-export const getOrderById = async (req, res) => {
+export const getOrderById = async (req, res, next) => {
     try {
         const { oid } = req.params;
         if (!oid) {
@@ -29,7 +29,7 @@ export const getOrderById = async (req, res) => {
     }
 }
 
-export const createOrder = async (req, res) => {
+export const createOrder = async (req, res, next) => {
     try {
         const orderData = req.body;
         const order = await OrderService.create(orderData);
@@ -43,7 +43,7 @@ export const createOrder = async (req, res) => {
     }
 }
 
-export const updateOrder = async (req, res) => {
+export const updateOrder = async (req, res, next) => {
     try {
         const { oid } = req.params;
         const { status } = req.body;
@@ -60,7 +60,7 @@ export const updateOrder = async (req, res) => {
     }
 }
 
-export const deleteOrder = async (req, res) => {
+export const deleteOrder = async (req, res, next) => {
     try {
         const { oid } = req.params;
         if (!oid) {
