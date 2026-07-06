@@ -1,13 +1,12 @@
 import { DeliveryRepository } from "../repositories/deliveries.repository.js";
 import { ORDER_STATUS } from "../constants/index.constants.js";
+import { createError } from "../utils/api.response.js";
 
 export const DeliveryService = {
     async getAll() {
         const deliveries = await DeliveryRepository.getAll();
         if (!deliveries) {
-            const error = new Error("No se encontraron entregas");
-            error.statusCode = 404;
-            throw error;
+            throw createError("DELIVERY_NOT_FOUND");
         }
         return deliveries;
     },
@@ -15,9 +14,7 @@ export const DeliveryService = {
     async getById(did) {
         const delivery = await DeliveryRepository.getById(did);
         if (!delivery) {
-            const error = new Error("Entrega no encontrada");
-            error.statusCode = 404;
-            throw error;
+            throw createError("DELIVERY_NOT_FOUND");
         }
         return delivery;
     },
@@ -25,9 +22,7 @@ export const DeliveryService = {
     async create(deliveryData) {
         const { order, driver, status, priority } = deliveryData;
         if (!order || !driver || !status || !priority) {
-            const error = new Error("Datos obligatorios no proporcionados");
-            error.statusCode = 400;
-            throw error;
+            throw createError("MISSING_REQUIRED_DATA");
         }
         deliveryData.assignedAt = status === ORDER_STATUS.ASSIGNED ? new Date() : null;
         deliveryData.deliveredAt = status === ORDER_STATUS.DELIVERED ? new Date() : null;
@@ -38,17 +33,13 @@ export const DeliveryService = {
         const delivery = await DeliveryRepository.getById(did);
 
         if (!delivery) {
-            const error = new Error("Entrega no encontrada");
-            error.statusCode = 404;
-            throw error;
+            throw createError("DELIVERY_NOT_FOUND");
         }
 
         const { status, priority } = deliveryUpdateData;
 
         if (!status || !priority) {
-            const error = new Error("Datos obligatorios no proporcionados");
-            error.statusCode = 400;
-            throw error;
+            throw createError("MISSING_REQUIRED_DATA");
         }
 
         if (status === ORDER_STATUS.ASSIGNED && !delivery.assignedAt) {
@@ -65,9 +56,7 @@ export const DeliveryService = {
     async delete(did) {
         const delivery = await DeliveryRepository.getById(did);
         if (!delivery) {
-            const error = new Error("Entrega no encontrada");
-            error.statusCode = 404;
-            throw error;
+            throw createError("DELIVERY_NOT_FOUND");
         }
         return await DeliveryRepository.delete(did);
     },

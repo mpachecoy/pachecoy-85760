@@ -5,15 +5,11 @@ import { generateMockOrders } from "../mocks/orders.mock.js";
 import { generateMockDeliveries } from "../mocks/deliveries.mock.js";
 import { UserRepository } from "../repositories/users.repository.js";
 
-
-
-
 export const mockDataService = {
     async createUser(n) {
         const user = generateMockUsers(n);
         return user;
     },
-
 
     async createStores(n) {
         const stores = generateMockStores(n);

@@ -6,6 +6,7 @@ import ordersRouter from "./routes/orders.router.js";
 import deliveriesRouter from "./routes/deliveries.router.js";
 import productsRouter from "./routes/products.router.js";
 import mockRouter from "./routes/mock.router.js";
+import { errorHandler, notFoundHandler } from "./middelwares/error.middleware.js";
 import { env } from "./config/env.config.js";
 
 const app = express();
@@ -37,11 +38,7 @@ if (env.nodeEnv === "development") {
   app.use("/api/mocks", mockRouter);
 };
 
-app.use((req, res) => {
-  res.status(404).json({
-    status: "error",
-    message: "Ruta no encontrada"
-  });
-});
+app.use(notFoundHandler);
+app.use(errorHandler);
 
 export default app;

@@ -1,11 +1,15 @@
 import { OrderService } from "../services/orders.service.js";
+import { successResponsae } from "../utils/api.response.js";
 
 export const getAllOrders = async (req, res) => {
     try {
         const orders = await OrderService.getAll();
-        res.json({ status: "success", payload: orders });
+        return successResponsae(res, {
+            message: "Pedidos obtenidos correctamente",
+            payload: orders
+        });
     } catch (error) {
-        res.status(500).json({ status: "error", message: error.message });
+        next(error)
     }
 }
 
@@ -16,9 +20,12 @@ export const getOrderById = async (req, res) => {
             return res.status(400).json({ status: "error", message: "ID no proporcionado" });
         }
         const order = await OrderService.getById(oid);
-        res.json({ status: "success", payload: order });
+        return successResponsae(res, {
+            message: `Pedido ${oid} obtenido correctamente`,
+            payload: order
+        });
     } catch (error) {
-        res.status(400).json({ status: "error", message: error.message });
+        next(error)
     }
 }
 
@@ -26,9 +33,13 @@ export const createOrder = async (req, res) => {
     try {
         const orderData = req.body;
         const order = await OrderService.create(orderData);
-        res.status(201).json({ status: "success", payload: order });
+        return successResponsae(res, {
+            statusCode: 201,
+            message: "Pedido creado correctamente",
+            payload: order
+        });
     } catch (error) {
-        res.status(400).json({ status: "error", message: error.message });
+        next(error)
     }
 }
 
@@ -40,9 +51,12 @@ export const updateOrder = async (req, res) => {
             return res.status(400).json({ status: "error", message: "ID no proporcionado" });
         }
         const order = await OrderService.updateStatusOrder(oid, status);
-        res.json({ status: "success", payload: order });
+        return successResponsae(res, {
+            message: `Pedido ${oid} actualizado correctamente`,
+            payload: order
+        });
     } catch (error) {
-        res.status(400).json({ status: "error", message: error.message });
+        next(error)
     }
 }
 
@@ -53,8 +67,11 @@ export const deleteOrder = async (req, res) => {
             return res.status(400).json({ status: "error", message: "ID no proporcionado" });
         }
         const order = await OrderService.delete(oid);
-        res.json({ status: "success", message: "Pedido eliminado correctamente", payload: order });
+        return successResponsae(res, {
+            message: `Pedido ${oid} eliminado correctamente`,
+            payload: order
+        });
     } catch (error) {
-        res.status(400).json({ status: "error", message: error.message });
+        next(error)
     }
 }

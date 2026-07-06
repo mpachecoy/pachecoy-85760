@@ -1,14 +1,13 @@
 import { StoreRepository } from "../repositories/stores.repository.js";
 import { USER_ROLES } from "../constants/index.constants.js";
 import { UserRepository } from "../repositories/users.repository.js";
+import { createError } from "../utils/api.response.js";
 
 export const StoreService = {
     async getAll() {
         const stores = await StoreRepository.getAll();
         if (!stores) {
-            const error = new Error("No se encontraron comercios");
-            error.statusCode = 404;
-            throw error;
+            throw createError("STORE_NOT_FOUND");
         }
         return stores;
     },
@@ -16,9 +15,7 @@ export const StoreService = {
     async getById(sid) {
         const store = await StoreRepository.getById(sid);
         if (!store) {
-            const error = new Error("Comercio no encontrado");
-            error.statusCode = 404;
-            throw error;
+            throw createError("STORE_NOT_FOUND");
         }
         return store;
     },
@@ -26,20 +23,14 @@ export const StoreService = {
     async create(storeData) {
         const { name, address, owner, isActive } = storeData;
         if (!name || !address || !owner) {
-            const error = new Error("Datos obligatorios no proporcionados");
-            error.statusCode = 400;
-            throw error;
+            throw createError("MISSING_REQUIRED_DATA");
         }
         const userOwner = await UserRepository.getById(owner);
         if (!userOwner) {
-            const error = new Error("Usuario no encontrado");
-            error.statusCode = 404;
-            throw error;
+            throw createError("USER_NOT_FOUND");
         }
         if (userOwner.role !== USER_ROLES.STORE) {
-            const error = new Error("El usuario no es un comercio");
-            error.statusCode = 400;
-            throw error;
+            throw createError("INVALID_ROLE");
         }
         const activeStatus = isActive ?? false;
         const storeToCreate = { ...storeData, isActive: activeStatus };
@@ -49,14 +40,10 @@ export const StoreService = {
     async update(sid, storeUpdateData) {
         const storeFound = await StoreRepository.getById(sid);
         if (!storeFound) {
-            const error = new Error("Comercio no encontrado");
-            error.statusCode = 404;
-            throw error;
+            throw createError("STORE_NOT_FOUND");
         }
         if (storeFound.isActive === false) {
-            const error = new Error("El comercio no esta activo");
-            error.statusCode = 400;
-            throw error;
+            throw createError("STORE_NOT_ACTIVE");
         }
 
         return await StoreRepository.update(sid, storeUpdateData);
@@ -65,9 +52,7 @@ export const StoreService = {
     async delete(sid) {
         const storeFound = await StoreRepository.getById(sid);
         if (!storeFound) {
-            const error = new Error("Comercio no encontrado");
-            error.statusCode = 404;
-            throw error;
+            throw createError("STORE_NOT_FOUND");
         }
         return await StoreRepository.delete(sid);
     }

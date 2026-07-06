@@ -1,91 +1,71 @@
 import { ProductService } from "../services/product.service.js";
+import { successResponsae } from "../utils/api.response.js";
 
-export const ProductController = {
-    async getAll(req, res) {
-        try {
-            const products = await ProductService.getAll();
-            res.status(200).json({
-                status: "success",
-                message: "Productos obtenidos correctamente",
-                data: products
-            });
-        } catch (error) {
-            res.status(error.statusCode || 500).json({
-                status: "error",
-                message: error.message
-            });
-        }
-    },
+export const getAllProducts = async (req, res) => {
+    try {
+        const products = await ProductService.getAll();
+        return successResponsae(res, {
+            message: "Productos obtenidos correctamente",
+            payload: products
+        });
+    } catch (error) {
+        next(error)
+    }
+}
 
-    async getById(req, res) {
-        try {
-            const { pid } = req.params;
-            const product = await ProductService.getById(pid);
-            res.status(200).json({
-                status: "success",
-                message: "Producto obtenido correctamente",
-                data: product
-            });
-        } catch (error) {
-            res.status(error.statusCode || 500).json({
-                status: "error",
-                message: error.message
-            });
-        }
-    },
+export const getProductById = async (req, res) => {
+    try {
+        const { pid } = req.params;
+        const product = await ProductService.getById(pid);
+        return successResponsae(res, {
+            message: "Producto obtenido correctamente",
+            payload: product
+        });
+    } catch (error) {
+        next(error)
+    }
+}
 
-    async create(req, res) {
-        try {
-            const productData = req.body;
-            const product = await ProductService.create(productData);
-            res.status(201).json({
-                status: "success",
-                message: "Producto creado correctamente",
-                data: product
-            });
-        } catch (error) {
-            res.status(error.statusCode || 500).json({
-                status: "error",
-                message: error.message
-            });
-        }
-    },
+export const createProduct = async (req, res) => {
+    try {
+        const productData = req.body;
+        const product = await ProductService.create(productData);
+        return successResponsae(res, {
+            statusCode: 201,
+            message: "Producto creado correctamente",
+            payload: product
+        });
+    } catch (error) {
+        next(error)
+    }
+}
 
-    async update(req, res) {
-        try {
-            const { pid } = req.params;
-            const productData = req.body;
-            const product = await ProductService.update(pid, productData);
-            res.status(200).json({
-                status: "success",
-                message: "Producto actualizado correctamente",
-                data: product
-            });
-        } catch (error) {
-            res.status(error.statusCode || 500).json({
-                status: "error",
-                message: error.message
-            });
-        }
-    },
+export const updateProduct = async (req, res) => {
+    try {
+        const { pid } = req.params;
+        const productData = req.body;
+        const product = await ProductService.update(pid, productData);
+        return successResponsae(res, {
+            message: "Producto actualizado correctamente",
+            payload: product
+        });
+    } catch (error) {
+        next(error)
+    }
+}
 
-    async delete(req, res) {
-        try {
-            const { pid } = req.params;
-            if (!pid) {
-                throw new Error("ID de producto no proporcionado");
-            }
-            const product = await ProductService.delete(pid);
-            res.status(200).json({
-                status: "success",
-                message: "Producto eliminado correctamente",
-                data: product
-            });
-        } catch (error) {
-            res.status(error.statusCode || 500).json({
-                status: "error",
-                message: error.message
-            });
+export const deleteProduct = async (req, res) => {
+    try {
+        const { pid } = req.params;
+        if (!pid) {
+            throw new Error("ID de producto no proporcionado");
         }
+        const product = await ProductService.delete(pid);
+        return successResponsae(res, {
+            message: "Producto eliminado correctamente",
+            payload: product
+        });
+    } catch (error) {
+        next(error)
     }
 }

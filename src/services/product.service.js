@@ -1,12 +1,11 @@
 import { ProductRepository } from "../repositories/products.repository.js";
+import { createError } from "../utils/api.response.js";
 
 export const ProductService = {
     async getAll() {
         const products = await ProductRepository.getAll();
         if (!products) {
-            const error = new Error("No se encontraron productos");
-            error.statusCode = 404;
-            throw error;
+            throw createError("PRODUCT_NOT_FOUND");
         }
         return products;
     },
@@ -14,9 +13,7 @@ export const ProductService = {
     async getById(pid) {
         const product = await ProductRepository.getById(pid);
         if (!product) {
-            const error = new Error("Producto no encontrado");
-            error.statusCode = 404;
-            throw error;
+            throw createError("PRODUCT_NOT_FOUND");
         }
         return product;
     },
@@ -24,9 +21,7 @@ export const ProductService = {
     async create(productData) {
         const { title, description, price, stock, category } = productData;
         if (!title || !description || !price || !stock || !category) {
-            const error = new Error("Datos obligatorios no proporcionados");
-            error.statusCode = 400;
-            throw error;
+            throw createError("MISSING_REQUIRED_DATA");
         }
         return await ProductRepository.create(productData);
     },
@@ -34,9 +29,7 @@ export const ProductService = {
     async update(pid, productData) {
         const product = await ProductRepository.getById(pid);
         if (!product) {
-            const error = new Error("Producto no encontrado");
-            error.statusCode = 404;
-            throw error;
+            throw createError("PRODUCT_NOT_FOUND");
         }
         return await ProductRepository.update(pid, productData);
     },
@@ -44,9 +37,7 @@ export const ProductService = {
     async delete(pid) {
         const product = await ProductRepository.getById(pid);
         if (!product) {
-            const error = new Error("Producto no encontrado");
-            error.statusCode = 404;
-            throw error;
+            throw createError("PRODUCT_NOT_FOUND");
         }
         return await ProductRepository.delete(pid);
     }
