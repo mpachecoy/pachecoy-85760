@@ -1,10 +1,10 @@
 import { StoreService } from "../services/store.service.js";
-import { successResponsae } from "../utils/api.response.js";
+import { successResponse } from "../utils/api.response.js";
 
 export const getAllStores = async (req, res, next) => {
     try {
         const stores = await StoreService.getAll();
-        return successResponsae(res, {
+        return successResponse(res, {
             message: "Comercios obtenidos correctamente",
             payload: stores,
         });
@@ -17,7 +17,7 @@ export const getStoreById = async (req, res, next) => {
     try {
         const { sid } = req.params;
         const store = await StoreService.getById(sid);
-        return successResponsae(res, {
+        return successResponse(res, {
             message: `Comercio ${sid} obtenido correctamente`,
             payload: store,
         });
@@ -30,7 +30,7 @@ export const createStore = async (req, res, next) => {
     try {
         const storeData = req.body;
         const store = await StoreService.create(storeData);
-        return successResponsae(res, {
+        return successResponse(res, {
             statusCode: 201,
             message: "Comercio creado correctamente",
             payload: store,
@@ -58,7 +58,7 @@ export const updateStore = async (req, res, next) => {
                 });
         }
         const store = await StoreService.update(sid, storeUpdateData);
-        return successResponsae(res, {
+        return successResponse(res, {
             message: `Comercio ${sid} actualizado correctamente`,
             payload: store,
         });
@@ -76,7 +76,7 @@ export const deleteStore = async (req, res) => {
                 .json({ status: "error", message: "ID de comercio no proporcionado" });
         }
         const store = await StoreService.delete(sid);
-        return successResponsae(res, {
+        return successResponse(res, {
             message: `Comercio ${sid} eliminado correctamente`,
             payload: store,
         });

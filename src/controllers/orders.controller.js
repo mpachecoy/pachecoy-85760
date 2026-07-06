@@ -1,10 +1,10 @@
 import { OrderService } from "../services/orders.service.js";
-import { successResponsae } from "../utils/api.response.js";
+import { successResponse } from "../utils/api.response.js";
 
 export const getAllOrders = async (req, res) => {
     try {
         const orders = await OrderService.getAll();
-        return successResponsae(res, {
+        return successResponse(res, {
             message: "Pedidos obtenidos correctamente",
             payload: orders
         });
@@ -20,7 +20,7 @@ export const getOrderById = async (req, res) => {
             return res.status(400).json({ status: "error", message: "ID no proporcionado" });
         }
         const order = await OrderService.getById(oid);
-        return successResponsae(res, {
+        return successResponse(res, {
             message: `Pedido ${oid} obtenido correctamente`,
             payload: order
         });
@@ -33,7 +33,7 @@ export const createOrder = async (req, res) => {
     try {
         const orderData = req.body;
         const order = await OrderService.create(orderData);
-        return successResponsae(res, {
+        return successResponse(res, {
             statusCode: 201,
             message: "Pedido creado correctamente",
             payload: order
@@ -51,7 +51,7 @@ export const updateOrder = async (req, res) => {
             return res.status(400).json({ status: "error", message: "ID no proporcionado" });
         }
         const order = await OrderService.updateStatusOrder(oid, status);
-        return successResponsae(res, {
+        return successResponse(res, {
             message: `Pedido ${oid} actualizado correctamente`,
             payload: order
         });
@@ -67,7 +67,7 @@ export const deleteOrder = async (req, res) => {
             return res.status(400).json({ status: "error", message: "ID no proporcionado" });
         }
         const order = await OrderService.delete(oid);
-        return successResponsae(res, {
+        return successResponse(res, {
             message: `Pedido ${oid} eliminado correctamente`,
             payload: order
         });

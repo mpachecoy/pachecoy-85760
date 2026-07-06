@@ -1,10 +1,10 @@
 import { ProductService } from "../services/product.service.js";
-import { successResponsae } from "../utils/api.response.js";
+import { successResponse } from "../utils/api.response.js";
 
 export const getAllProducts = async (req, res) => {
     try {
         const products = await ProductService.getAll();
-        return successResponsae(res, {
+        return successResponse(res, {
             message: "Productos obtenidos correctamente",
             payload: products
         });
@@ -17,7 +17,7 @@ export const getProductById = async (req, res) => {
     try {
         const { pid } = req.params;
         const product = await ProductService.getById(pid);
-        return successResponsae(res, {
+        return successResponse(res, {
             message: "Producto obtenido correctamente",
             payload: product
         });
@@ -30,7 +30,7 @@ export const createProduct = async (req, res) => {
     try {
         const productData = req.body;
         const product = await ProductService.create(productData);
-        return successResponsae(res, {
+        return successResponse(res, {
             statusCode: 201,
             message: "Producto creado correctamente",
             payload: product
@@ -45,7 +45,7 @@ export const updateProduct = async (req, res) => {
         const { pid } = req.params;
         const productData = req.body;
         const product = await ProductService.update(pid, productData);
-        return successResponsae(res, {
+        return successResponse(res, {
             message: "Producto actualizado correctamente",
             payload: product
         });
@@ -61,7 +61,7 @@ export const deleteProduct = async (req, res) => {
             throw new Error("ID de producto no proporcionado");
         }
         const product = await ProductService.delete(pid);
-        return successResponsae(res, {
+        return successResponse(res, {
             message: "Producto eliminado correctamente",
             payload: product
         });

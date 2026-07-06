@@ -1,11 +1,11 @@
 import { DeliveryService } from "../services/deliveries.service.js";
-import { successResponsae } from "../utils/api.response.js";
+import { successResponse } from "../utils/api.response.js";
 
 
 export const getAllDeliveries = async (req, res) => {
     try {
         const deliveries = await DeliveryService.getAll();
-        return successResponsae(res, {
+        return successResponse(res, {
             message: "Entregas obtenidas correctamente",
             payload: deliveries
         });
@@ -21,7 +21,7 @@ export const getDeliveryById = async (req, res) => {
             return res.status(400).json({ status: "error", message: "ID de entrega no proporcionado" });
         }
         const delivery = await DeliveryService.getById(did);
-        return successResponsae(res, {
+        return successResponse(res, {
             message: `Entrega ${did} obtenida correctamente`,
             payload: delivery
         });
@@ -34,7 +34,7 @@ export const createDelivery = async (req, res) => {
     try {
         const body = req.body;
         const delivery = await DeliveryService.create(body);
-        return successResponsae(res, {
+        return successResponse(res, {
             statusCode: 201,
             message: "Entrega creada correctamente",
             payload: delivery
@@ -53,7 +53,7 @@ export const updateDelivery = async (req, res) => {
             return res.status(400).json({ status: "error", message: "ID de entrega no proporcionado" });
         }
         const updatedDelivery = await DeliveryService.update(did, updateDelivery);
-        return successResponsae(res, {
+        return successResponse(res, {
             message: `Entrega ${did} actualizada correctamente`,
             payload: updatedDelivery
         });
@@ -69,7 +69,7 @@ export const deleteDelivery = async (req, res) => {
             return res.status(400).json({ status: "error", message: "ID de entrega no proporcionado" });
         }
         const delivery = await DeliveryService.delete(did);
-        return successResponsae(res, {
+        return successResponse(res, {
             message: `Entrega ${did} eliminada correctamente`,
             payload: delivery
         });
