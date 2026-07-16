@@ -1,4 +1,8 @@
 import { errorResponse, createError } from "../utils/api.response.js";
+import { CustomError } from "../utils/custom.error.js";
+import mongoose from "mongoose";
+import { env } from "../config/env.config.js";
+
 
 const normalizeError = (error) => {
     if (error instanceof CustomError) {
@@ -25,12 +29,11 @@ const normalizeError = (error) => {
 export const errorHandler = (error, req, res, next) => {
     const standardizedError = normalizeError(error);
 
-    // Log del error completo del lado del servidor (nunca se expone al cliente)
-    // if (standardizedError.statusCode >= 500) {
-    //     console.error(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl} ->`, error);
-    // } else if (env.nodeEnv === "development") {
-    //     console.warn(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl} -> ${standardizedError.code}: ${standardizedError.message}`);
-    // }
+    if (standardizedError.statusCode >= 500) {
+        console.error(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl} ->`, error);
+    } else if (env.nodeEnv === "development") {
+        console.warn(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl} -> ${standardizedError.code}: ${standardizedError.message}`);
+    }
 
     const statusCode = standardizedError.statusCode;
     const errorCode = standardizedError.code;

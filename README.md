@@ -12,7 +12,6 @@ Permite administrar el ciclo completo de compra y distribución: creación de pr
 - MongoDB + Mongoose
 - Passport (dependencia instalada, integración de autenticación pendiente)
 - bcrypt (hash de contraseñas)
-- cors
 - dotenv
 - @faker-js/faker (generación de datos mock, solo en desarrollo)
 
