@@ -2,7 +2,7 @@ import { errorResponse, createError } from "../utils/api.response.js";
 import { CustomError } from "../utils/custom.error.js";
 import mongoose from "mongoose";
 import { env } from "../config/env.config.js";
-
+import logger from "../utils/logger.js";
 
 const normalizeError = (error) => {
     if (error instanceof CustomError) {
@@ -30,9 +30,9 @@ export const errorHandler = (error, req, res, next) => {
     const standardizedError = normalizeError(error);
 
     if (standardizedError.statusCode >= 500) {
-        console.error(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl} ->`, error);
+        logger.error(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl} ->`, error);
     } else if (env.nodeEnv === "development") {
-        console.warn(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl} -> ${standardizedError.code}: ${standardizedError.message}`);
+        logger.warn(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl} -> ${standardizedError.code}: ${standardizedError.message}`);
     }
 
     const statusCode = standardizedError.statusCode;
