@@ -12,7 +12,7 @@ export const getAllProducts = asyncHandler(async (req, res) => {
 
 export const getProductById = asyncHandler(async (req, res) => {
     const { pid } = req.params;
-    if (pid) {
+    if (!pid) {
         throw createError("INVALID_INPUT", "ID de producto no proporcionado");
     }
     const product = await ProductService.getById(pid);

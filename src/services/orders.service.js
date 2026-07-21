@@ -52,11 +52,11 @@ export const OrderService = {
         if (!order) {
             throw createError("ORDER_NOT_FOUND");
         }
-        const validStatuses = [ORDER_STATUS.PENDING, ORDER_STATUS.COMPLETED, ORDER_STATUS.CANCELLED];
+        const validStatuses = [ORDER_STATUS.PENDING, ORDER_STATUS.COMPLETED, ORDER_STATUS.CANCELLED, ORDER_STATUS.IN_PROGRESS, ORDER_STATUS.IN_TRANSIT, ORDER_STATUS.PICKED_UP, ORDER_STATUS.DELIVERED, ORDER_STATUS.REJECTED, ORDER_STATUS.CONFIRMED];
         if (!validStatuses.includes(status)) {
             throw createError("INVALID_STATUS");
         }
-        const updatedOrder = await OrderRepository.updateStatusOrder(id, status);
+        const updatedOrder = await OrderRepository.updateStatusOrder(oid, status);
         return updatedOrder;
     },
 

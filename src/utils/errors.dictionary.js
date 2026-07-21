@@ -154,5 +154,14 @@ export const ERROR_DICTIONARY = {
         message: "Items inválidos"
     },
 
+    INVALID_INPUT: {
+        statusCode: 400,
+        message: "Input inválido"
+    },
+
+    INVALID_ID: {
+        statusCode: 400,
+        message: "ID inválido"
+    },
 
 }
