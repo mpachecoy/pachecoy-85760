@@ -1,5 +1,6 @@
 import winston from "winston";
 import { env } from "../config/env.config.js";
+import DailyRotateFile from "winston-daily-rotate-file";
 
 const customLevels = {
     levels: {
@@ -43,14 +44,21 @@ const consoleTransport = new winston.transports.Console({
     format: consoleFormat,
 });
 
-
+const errorRotateTransport = new DailyRotateFile({
+    filename: "error.%DATE%.log",
+    datePattern: "YYYY-MM-DD",
+    zippedArchive: true,
+    maxSize: "20mb",
+    maxFiles: "30d",
+    level: "error",
+    format: logFormat,
+});
 
 const logger = winston.createLogger({
     levels: customLevels.levels,
     level: env.nodeEnv === "development" ? "info" : "debug",
     format: logFormat,
-    transports:
-        consoleTransport,
+    transports: [consoleTransport, errorRotateTransport]
 });
 
 if (env.nodeEnv === "development") {
