@@ -1,0 +1,56 @@
+{"level":"info","message":"Servidor corriendo en http://localhost:8080 en modo development","timestamp":"2026-07-27 18:35:16"}
+{"level":"info","message":"Servidor corriendo en http://localhost:8080 en modo development","timestamp":"2026-07-27 18:35:50"}
+{"level":"info","message":"Servidor corriendo en http://localhost:8080 en modo development","timestamp":"2026-07-27 18:36:27"}
+{"level":"info","message":"Servidor corriendo en http://localhost:8080 en modo development","timestamp":"2026-07-27 18:38:09"}
+{"level":"info","message":"Servidor corriendo en http://localhost:8080 en modo development","timestamp":"2026-07-27 18:38:18"}
+{"level":"info","message":"Servidor corriendo en http://localhost:8080 en modo development","timestamp":"2026-07-27 18:38:37"}
+{"level":"info","message":"Servidor corriendo en http://localhost:8080 en modo development","timestamp":"2026-07-27 18:38:42"}
+{"level":"info","message":"Servidor corriendo en http://localhost:8080 en modo development","timestamp":"2026-07-27 18:39:26"}
+{"level":"info","message":"Servidor corriendo en http://localhost:8080 en modo development","timestamp":"2026-07-27 18:40:05"}
+{"level":"info","message":"Servidor corriendo en http://localhost:8080 en modo development","timestamp":"2026-07-27 18:40:12"}
+{"level":"info","message":"Servidor corriendo en http://localhost:8080 en modo development","timestamp":"2026-07-27 18:40:32"}
+{"level":"warn","message":"[2026-07-27T21:44:37.785Z] POST /api/users/ -> MISSING_REQUIRED_DATA: Datos requeridos faltantes","timestamp":"2026-07-27 18:44:37"}
+{"level":"warn","message":"[2026-07-27T21:45:09.272Z] GET /api/users/:id -> INVALID_ID: ID inválido: :id","timestamp":"2026-07-27 18:45:09"}
+{"level":"warn","message":"[2026-07-27T21:45:16.298Z] GET /api/users/:id -> INVALID_ID: ID inválido: :id","timestamp":"2026-07-27 18:45:16"}
+{"level":"info","message":"Servidor corriendo en http://localhost:8080 en modo development","timestamp":"2026-07-27 18:46:26"}
+{"level":"warn","message":"[2026-07-27T21:46:32.040Z] GET /api/users/%7Buid%7D -> INVALID_ID: ID inválido: {uid}","timestamp":"2026-07-27 18:46:32"}
+{"level":"info","message":"Servidor corriendo en http://localhost:8080 en modo development","timestamp":"2026-07-27 18:48:06"}
+{"level":"info","message":"Servidor corriendo en http://localhost:8080 en modo development","timestamp":"2026-07-27 18:48:12"}
+{"level":"info","message":"Servidor corriendo en http://localhost:8080 en modo development","timestamp":"2026-07-27 18:48:28"}
+{"level":"info","message":"Servidor corriendo en http://localhost:8080 en modo development","timestamp":"2026-07-27 18:49:04"}
+{"level":"info","message":"Servidor corriendo en http://localhost:8080 en modo development","timestamp":"2026-07-27 18:49:11"}
+{"level":"info","message":"Servidor corriendo en http://localhost:8080 en modo development","timestamp":"2026-07-27 18:50:03"}
+{"level":"info","message":"Servidor corriendo en http://localhost:8080 en modo development","timestamp":"2026-07-27 18:53:09"}
+{"level":"info","message":"Servidor corriendo en http://localhost:8080 en modo development","timestamp":"2026-07-27 18:53:15"}
+{"level":"info","message":"Servidor corriendo en http://localhost:8080 en modo development","timestamp":"2026-07-27 18:53:19"}
+{"level":"warn","message":"[2026-07-27T21:56:28.422Z] GET /api/users/6a4485be97eca2972879e510d -> INVALID_ID: ID inválido: 6a4485be97eca2972879e510d","timestamp":"2026-07-27 18:56:28"}
+{"level":"warn","message":"[2026-07-27T21:56:36.887Z] GET /api/users/6a4485be97eca2972879e513 -> USER_NOT_FOUND: Usuario no encontrado","timestamp":"2026-07-27 18:56:36"}
+{"level":"warn","message":"[2026-07-27T21:56:47.774Z] GET /api/users/6a4485be97eca2972879e510h -> INVALID_ID: ID inválido: 6a4485be97eca2972879e510h","timestamp":"2026-07-27 18:56:47"}
+{"level":"warn","message":"[2026-07-27T21:56:55.708Z] GET /api/users/6a4485be97eca2972879e511 -> USER_NOT_FOUND: Usuario no encontrado","timestamp":"2026-07-27 18:56:55"}
+{"level":"info","message":"Servidor corriendo en http://localhost:8080 en modo development","timestamp":"2026-07-27 19:13:50"}
+{"level":"info","message":"Servidor corriendo en http://localhost:8080 en modo development","timestamp":"2026-07-27 19:16:33"}
+{"level":"info","message":"Servidor corriendo en http://localhost:8080 en modo development","timestamp":"2026-07-27 19:19:05"}
+{"level":"info","message":"Servidor corriendo en http://localhost:8080 en modo development","timestamp":"2026-07-27 19:19:14"}
+{"level":"info","message":"Servidor corriendo en http://localhost:8080 en modo development","timestamp":"2026-07-27 19:19:42"}
+{"level":"info","message":"Servidor corriendo en http://localhost:8080 en modo development","timestamp":"2026-07-27 19:19:51"}
+{"level":"info","message":"Servidor corriendo en http://localhost:8080 en modo development","timestamp":"2026-07-27 19:20:56"}
+{"level":"info","message":"Servidor corriendo en http://localhost:8080 en modo development","timestamp":"2026-07-27 19:22:28"}
+{"level":"info","message":"Servidor corriendo en http://localhost:8080 en modo development","timestamp":"2026-07-27 19:22:47"}
+{"level":"info","message":"Servidor corriendo en http://localhost:8080 en modo development","timestamp":"2026-07-27 19:23:30"}
+{"level":"info","message":"Servidor corriendo en http://localhost:8080 en modo development","timestamp":"2026-07-27 19:24:24"}
+{"level":"info","message":"Servidor corriendo en http://localhost:8080 en modo development","timestamp":"2026-07-27 19:29:40"}
+{"level":"warn","message":"[2026-07-27T22:30:58.203Z] GET /api/users/6a4485be97eca2972879e510khgkjh -> INVALID_ID: ID inválido: 6a4485be97eca2972879e510khgkjh","timestamp":"2026-07-27 19:30:58"}
+{"level":"info","message":"Servidor corriendo en http://localhost:8080 en modo development","timestamp":"2026-07-27 19:31:19"}
+{"level":"info","message":"Servidor corriendo en http://localhost:8080 en modo development","timestamp":"2026-07-27 19:31:44"}
+{"level":"info","message":"Servidor corriendo en http://localhost:8080 en modo development","timestamp":"2026-07-27 19:32:30"}
+{"level":"info","message":"Servidor corriendo en http://localhost:8080 en modo development","timestamp":"2026-07-27 19:39:40"}
+{"level":"info","message":"Servidor corriendo en http://localhost:8080 en modo development","timestamp":"2026-07-27 19:39:45"}
+{"level":"info","message":"Servidor corriendo en http://localhost:8080 en modo development","timestamp":"2026-07-27 19:42:11"}
+{"level":"info","message":"Servidor corriendo en http://localhost:8080 en modo development","timestamp":"2026-07-27 19:44:12"}
+{"level":"info","message":"Servidor corriendo en http://localhost:8080 en modo development","timestamp":"2026-07-27 19:44:35"}
+{"level":"info","message":"Servidor corriendo en http://localhost:8080 en modo development","timestamp":"2026-07-27 19:45:03"}
+{"level":"info","message":"Servidor corriendo en http://localhost:8080 en modo development","timestamp":"2026-07-27 19:45:08"}
+{"level":"info","message":"Servidor corriendo en http://localhost:8080 en modo development","timestamp":"2026-07-27 19:45:13"}
+{"level":"info","message":"Servidor corriendo en http://localhost:8080 en modo development","timestamp":"2026-07-27 19:45:57"}
+{"level":"info","message":"Servidor corriendo en http://localhost:8080 en modo development","timestamp":"2026-07-27 19:46:10"}
+{"level":"info","message":"Servidor corriendo en http://localhost:8080 en modo development","timestamp":"2026-07-27 19:46:16"}

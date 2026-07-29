@@ -7,6 +7,7 @@ import deliveriesRouter from "./routes/deliveries.router.js";
 import productsRouter from "./routes/products.router.js";
 import loggerTestRouter from "./routes/loggerTest.router.js";
 import mockRouter from "./routes/mock.router.js";
+import docsRouter from "./routes/docs.router.js";
 import { errorHandler, notFoundHandler } from "./middlewares/error.middleware.js";
 import { env } from "./config/env.config.js";
 
@@ -36,6 +37,8 @@ app.use("/api/deliveries", deliveriesRouter);
 app.use("/api/products", productsRouter);
 
 app.use("/api/loggerTest", loggerTestRouter);
+
+app.use("/api/docs", docsRouter);
 
 if (env.nodeEnv === "development") {
   app.use("/api/mocks", mockRouter);

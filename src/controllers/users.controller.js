@@ -14,7 +14,7 @@ export const getAllUsers = asyncHandler(async (req, res) => {
 export const getUserById = asyncHandler(async (req, res) => {
     const { uid } = req.params;
     if (!uid) {
-        throw createError("INVALID_INPUT", "ID de usuario no proporcionado");
+        throw createError("INVALID_INPUT");
     }
     const user = await UserService.getById(uid);
     return successResponse(res, {
@@ -37,7 +37,7 @@ export const updateUser = asyncHandler(async (req, res) => {
     const { uid } = req.params;
     const userData = req.body;
     if (!uid) {
-        throw createError("INVALID_INPUT", "ID de usuario no proporcionado");
+        throw createError("INVALID_INPUT");
     }
     const user = await UserService.update(uid, userData);
     return successResponse(res, {
@@ -49,7 +49,7 @@ export const updateUser = asyncHandler(async (req, res) => {
 export const deleteUser = asyncHandler(async (req, res) => {
     const { uid } = req.params;
     if (!uid) {
-        throw createError("INVALID_INPUT", "ID de usuario no proporcionado");
+        throw createError("INVALID_INPUT");
     }
     const user = await UserService.delete(uid);
     return successResponse(res, {

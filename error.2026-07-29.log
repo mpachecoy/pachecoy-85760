@@ -1,0 +1,13 @@
+{"level":"info","message":"Servidor corriendo en http://localhost:8080 en modo development","timestamp":"2026-07-29 12:03:25"}
+{"level":"info","message":"Servidor corriendo en http://localhost:8080 en modo development","timestamp":"2026-07-29 12:03:32"}
+{"level":"info","message":"Servidor corriendo en http://localhost:8080 en modo development","timestamp":"2026-07-29 12:29:38"}
+{"level":"warn","message":"[2026-07-29T15:30:35.057Z] PUT /api/orders/6a4485be97eca2972879e510/status -> ORDER_NOT_FOUND: Orden no encontrada","timestamp":"2026-07-29 12:30:35"}
+{"level":"warn","message":"[2026-07-29T15:31:01.847Z] PUT /api/orders/6a40481b66d43f3cadaa8021/status -> INVALID_STATUS: Estado inválido","timestamp":"2026-07-29 12:31:01"}
+{"level":"info","message":"Servidor corriendo en http://localhost:8080 en modo development","timestamp":"2026-07-29 16:25:00"}
+{"level":"info","message":"Servidor corriendo en http://localhost:8080 en modo development","timestamp":"2026-07-29 16:26:02"}
+{"level":"info","message":"Servidor corriendo en http://localhost:8080 en modo development","timestamp":"2026-07-29 16:26:11"}
+{"level":"debug","message":"Log de nivel debug","timestamp":"2026-07-29 16:26:17"}
+{"level":"http","message":"Log de nivel http","timestamp":"2026-07-29 16:26:17"}
+{"level":"info","message":"Log de nivel info","timestamp":"2026-07-29 16:26:17"}
+{"level":"warn","message":"Log de nivel warning","timestamp":"2026-07-29 16:26:17"}
+{"level":"error","message":"Log de nivel error","timestamp":"2026-07-29 16:26:17"}
