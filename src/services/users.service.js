@@ -30,7 +30,7 @@ export const UserService = {
             throw createError("USER_ALREADY_EXISTS");
         }
         if (role) {
-            const validRoles = [USER_ROLES.ADMIN, USER_ROLES.CUSTOMER, USER_ROLES.DRIVER, USER_ROLES.STORE, USER_ROLES.USER];
+            const validRoles = [USER_ROLES.ADMIN, USER_ROLES.CUSTOMER, USER_ROLES.DRIVER, USER_ROLES.STORE, USER_ROLES.USER, USER_ROLES.OWNER];
             if (!validRoles.includes(role)) {
                 throw createError("INVALID_ROLE");
             }

@@ -277,11 +277,22 @@ export const swaggerSpec = swaggerJSDoc({
                 DeliveryInput: {
                     type: "object",
                     properties: {
-                        userId: {
+                        driver: {
                             type: "string",
                             example: "6a4485be97eca2972879e510"
                         },
-
+                        order: {
+                            type: "string",
+                            example: "6a4485be97eca2972879e510"
+                        },
+                        status: {
+                            type: "string",
+                            example: "pending"
+                        },
+                        priority: {
+                            type: "string",
+                            example: "normal"
+                        }
                     }
                 },
                 Product: {

@@ -13,6 +13,7 @@ export const DeliveryRepository = {
     },
 
     async create(deliveryData) {
+        console.log("deliveryDataRepository", deliveryData);
         return await DeliveryModel.create(deliveryData);
     },
 

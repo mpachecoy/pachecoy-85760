@@ -11,3 +11,24 @@
 {"level":"info","message":"Log de nivel info","timestamp":"2026-07-29 16:26:17"}
 {"level":"warn","message":"Log de nivel warning","timestamp":"2026-07-29 16:26:17"}
 {"level":"error","message":"Log de nivel error","timestamp":"2026-07-29 16:26:17"}
+{"level":"info","message":"Servidor corriendo en http://localhost:8080 en modo development","timestamp":"2026-07-29 16:30:44"}
+{"level":"warn","message":"[2026-07-29T19:34:56.350Z] POST /api/mocks/users/5 -> VALIDATION_ERROR: `owner` is not a valid enum value for path `role`.","timestamp":"2026-07-29 16:34:56"}
+{"level":"info","message":"Servidor corriendo en http://localhost:8080 en modo development","timestamp":"2026-07-29 16:36:36"}
+{"level":"warn","message":"[2026-07-29T19:36:41.807Z] POST /api/mocks/users/5 -> VALIDATION_ERROR: `owner` is not a valid enum value for path `role`.","timestamp":"2026-07-29 16:36:41"}
+{"level":"warn","message":"[2026-07-29T19:36:56.106Z] POST /api/mocks/users/5 -> VALIDATION_ERROR: `owner` is not a valid enum value for path `role`.","timestamp":"2026-07-29 16:36:56"}
+{"level":"warn","message":"[2026-07-29T19:37:06.061Z] POST /api/mocks/users/ -> ROUTE_NOT_FOUND: Ruta no encontrada: POST /api/mocks/users/","timestamp":"2026-07-29 16:37:06"}
+{"level":"warn","message":"[2026-07-29T19:38:03.387Z] POST /api/deliveries -> MISSING_REQUIRED_DATA: Datos requeridos faltantes","timestamp":"2026-07-29 16:38:03"}
+{"level":"warn","message":"[2026-07-29T19:38:04.684Z] POST /api/deliveries -> MISSING_REQUIRED_DATA: Datos requeridos faltantes","timestamp":"2026-07-29 16:38:04"}
+{"level":"info","message":"Servidor corriendo en http://localhost:8080 en modo development","timestamp":"2026-07-29 16:40:33"}
+{"level":"info","message":"Servidor corriendo en http://localhost:8080 en modo development","timestamp":"2026-07-29 16:40:42"}
+{"level":"info","message":"Servidor corriendo en http://localhost:8080 en modo development","timestamp":"2026-07-29 16:41:02"}
+{"level":"info","message":"Servidor corriendo en http://localhost:8080 en modo development","timestamp":"2026-07-29 16:41:07"}
+{"level":"info","message":"Servidor corriendo en http://localhost:8080 en modo development","timestamp":"2026-07-29 16:41:30"}
+{"level":"warn","message":"[2026-07-29T19:41:44.097Z] POST /api/deliveries -> MISSING_REQUIRED_DATA: Datos requeridos faltantes","timestamp":"2026-07-29 16:41:44"}
+{"level":"warn","message":"[2026-07-29T19:42:58.127Z] POST /api/deliveries -> MISSING_REQUIRED_DATA: Datos requeridos faltantes","timestamp":"2026-07-29 16:42:58"}
+{"level":"info","message":"Servidor corriendo en http://localhost:8080 en modo development","timestamp":"2026-07-29 16:43:56"}
+{"level":"info","message":"Servidor corriendo en http://localhost:8080 en modo development","timestamp":"2026-07-29 16:44:05"}
+{"level":"warn","message":"[2026-07-29T19:44:15.723Z] POST /api/deliveries -> VALIDATION_ERROR: `pending` is not a valid enum value for path `status`.","timestamp":"2026-07-29 16:44:15"}
+{"level":"info","message":"Servidor corriendo en http://localhost:8080 en modo development","timestamp":"2026-07-29 16:47:55"}
+{"level":"warn","message":"[2026-07-29T19:48:01.963Z] POST /api/deliveries -> VALIDATION_ERROR: `pending` is not a valid enum value for path `status`.","timestamp":"2026-07-29 16:48:01"}
+{"level":"info","message":"Servidor corriendo en http://localhost:8080 en modo development","timestamp":"2026-07-29 16:48:05"}
