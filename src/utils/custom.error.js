@@ -8,3 +8,4 @@ export class CustomError extends Error {
         this.code = ERROR_DICTIONARY[code] ? code : "INTERNAL_SERVER_ERROR";
     }
 }
+

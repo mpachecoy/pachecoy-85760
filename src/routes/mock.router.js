@@ -12,7 +12,7 @@ const router = Router();
 
 /**
  * @swagger
- * /api/mock/users/{n}:
+ * /api/mocks/users/{n}:
  *   get:
  *     summary: Obtiene n usuarios mock.
  *     description: Devuelve n usuarios mock.
@@ -38,7 +38,7 @@ router.get("/users/:n", getMockUsers);
 
 /**
  * @swagger
- * /api/mock/stores/{n}:
+ * /api/mocks/stores/{n}:
  *   get:
  *     summary: Obtiene n tiendas mock.
  *     description: Devuelve n tiendas mock.
@@ -64,7 +64,7 @@ router.get("/stores/:n", getMockStores);
 
 /**
  * @swagger
- * /api/mock/products/{n}:
+ * /api/mocks/products/{n}:
  *   get:
  *     summary: Obtiene n productos mock.
  *     description: Devuelve n productos mock.
@@ -90,7 +90,7 @@ router.get("/products/:n", getMockProducts);
 
 /**
  * @swagger
- * /api/mock/orders/{n}:
+ * /api/mocks/orders/{n}:
  *   get:
  *     summary: Obtiene n órdenes mock.
  *     description: Devuelve n órdenes mock.
@@ -116,7 +116,7 @@ router.get("/orders/:n", getMockOrders);
 
 /**
  * @swagger
- * /api/mock/deliveries/{n}:
+ * /api/mocks/deliveries/{n}:
  *   get:
  *     summary: Obtiene n entregas mock.
  *     description: Devuelve n entregas mock.
@@ -142,7 +142,7 @@ router.get("/deliveries/:n", getMockDeliveries);
 
 /**
  * @swagger
- * /api/mock/users/{n}:
+ * /api/mocks/users/{n}:
  *   post:
  *     summary: Guarda n usuarios mock.
  *     description: Guarda n usuarios mock en la base de datos.

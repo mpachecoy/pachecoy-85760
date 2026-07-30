@@ -287,7 +287,7 @@ export const swaggerSpec = swaggerJSDoc({
                         },
                         status: {
                             type: "string",
-                            example: "pending"
+                            example: "created"
                         },
                         priority: {
                             type: "string",

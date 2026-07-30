@@ -15,6 +15,7 @@ Permite administrar el ciclo completo de compra y distribución: creación de pr
 - cors
 - dotenv
 - Winston + winston-daily-rotate-file (logging estructurado con rotación diaria)
+- swagger-jsdoc + swagger-ui-express (documentación interactiva de la API)
 - @faker-js/faker (generación de datos mock, solo en desarrollo)
 
 ---
@@ -115,6 +116,55 @@ Error:
 - **DailyRotateFile** (`error.YYYY-MM-DD.log`) — solo nivel `error`, con rotación diaria, compresión y retención de 30 días.
 
 Existe un endpoint de prueba, `GET /api/loggerTest`, que dispara un log de cada nivel para verificar que todo el pipeline funciona.
+
+---
+
+## Documentación interactiva (Swagger)
+
+La API expone su documentación en **`GET /api/docs`** (Swagger UI). Está montada en `app.js` sin depender de `NODE_ENV`, así que también está disponible en producción.
+
+- Generada con `swagger-jsdoc` a partir de anotaciones `@swagger` escritas directamente en los archivos de `src/routes/*.js`.
+- Servida con `swagger-ui-express` desde `src/routes/docs.router.js`.
+- Los schemas (`User`, `Order`, `Delivery`, `Product`, `Store`, y sus variantes `*Input`/`*Response`/`*ErrorResponse`) están centralizados en `src/config/swagger.js`.
+
+### Módulos documentados
+
+| Módulo                          | ¿Tiene anotaciones `@swagger`?                               |
+| ------------------------------- | ------------------------------------------------------------ |
+| Users (`/api/users`)            | ✅ Sí                                                        |
+| Orders (`/api/orders`)          | ✅ Sí                                                        |
+| Deliveries (`/api/deliveries`)  | ✅ Sí                                                        |
+| Mocks (`/api/mocks`)            | ✅ Sí                                                        |
+| Logger test (`/api/loggerTest`) | ✅ Sí                                                        |
+| Products (`/api/products`)      | ❌ No — el endpoint funciona, pero no aparece en `/api/docs` |
+| Stores (`/api/stores`)          | ❌ No — el endpoint funciona, pero no aparece en `/api/docs` |
+
+### Cómo levantar el servidor y abrir la documentación
+
+```bash
+npm install
+cp .env.example .env   # completar PORT, MONGODB_URI y NODE_ENV
+npm run dev            # o: npm start
+```
+
+Con el servidor arriba (por defecto en `http://localhost:8080`), abrir en el navegador:
+
+```
+http://localhost:8080/api/docs
+```
+
+(`/api/docs`, sin la barra final, también funciona — redirige automáticamente a `/api/docs/`).
+
+### Aclaraciones para probar los endpoints
+
+- Cada operación tiene un botón **"Try it out"** que arma y envía el request desde el propio navegador — no hace falta Postman ni `curl` para las pruebas básicas.
+- El campo `servers` en `src/config/swagger.js` está fijo en `http://localhost:8080`. Si corrés la API en otro puerto (variable `PORT` en `.env`), Swagger UI va a cargar igual, pero el botón "Try it out" va a fallar hasta que cambies esa URL en el archivo o la pegues manualmente en el selector "Servers" de la interfaz.
+- Los endpoints que reciben un ID por parámetro (`:uid`, `:oid`, `:did`, `:pid`, `:sid`) necesitan un `ObjectId` real que ya exista en tu base — probá primero un `GET` de la colección para conseguir uno, o generá datos de prueba con `/api/mocks` (ver tabla de Mocks más abajo).
+- ⚠️ Los ejemplos de `OrderInput` y `Delivery`/`DeliveryInput` en `src/config/swagger.js` están desactualizados respecto al modelo real:
+  - `OrderInput` solo documenta un campo `userId`, pero `POST /api/orders` en realidad requiere `customer`, `store`, `items` (array de `{ product, quantity, price }`) y `deliveryAddress` (ver tabla de **Orders** en Entidades implementadas).
+  - El schema de respuesta `Delivery` documenta `orderId`/`driverId`, pero el modelo real usa `order`/`driver` (que es lo que sí usa correctamente `DeliveryInput`).
+  - Si probás "Try it out" con el ejemplo tal cual lo pre-carga Swagger para estos dos casos, vas a recibir un `400` (`MISSING_REQUIRED_DATA` o `VALIDATION_ERROR`) — reemplazá el body por los campos reales antes de ejecutar.
+- Para generar datos de prueba rápido antes de probar Orders/Deliveries: `GET /api/mocks/users/:n` (usuarios de ejemplo sin persistir) o `POST /api/mocks/users/:n` (los guarda en la base, para tener IDs reales que usar en otros endpoints).
 
 ---
 
@@ -246,6 +296,7 @@ Mismos verbos que Users, con `:pid`.
 
 - `GET /` — status de la API
 - `GET /health` — healthcheck
+- `GET /api/docs` — documentación interactiva (Swagger UI)
 - `GET /api/loggerTest` — dispara un log de cada nivel (debug/http/info/warn/error/fatal) para probar Winston
 
 ---
@@ -275,6 +326,8 @@ npm run dev
 # modo producción
 npm start
 ```
+
+Con el servidor corriendo, la documentación interactiva queda disponible en `http://localhost:8080/api/docs` (ver sección [Documentación interactiva (Swagger)](#documentación-interactiva-swagger)).
 
 ---
 

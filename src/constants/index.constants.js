@@ -15,11 +15,6 @@ export const ORDER_STATUS = Object.freeze({
     IN_TRANSIT: 'in_transit',
     DELIVERED: 'delivered',
     CANCELLED: 'cancelled',
-    PENDING: 'pending',
-    REJECTED: 'rejected',
-    CONFIRMED: 'confirmed',
-    IN_PROGRESS: 'in_progress',
-    COMPLETED: 'completed',
 });
 
 

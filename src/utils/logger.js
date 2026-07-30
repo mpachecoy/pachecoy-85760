@@ -4,12 +4,12 @@ import DailyRotateFile from "winston-daily-rotate-file";
 
 const customLevels = {
     levels: {
-        debug: 0,
-        http: 1,
-        info: 2,
-        warn: 3,
-        error: 4,
-        fatal: 5
+        fatal: 0,
+        error: 1,
+        warn: 2,
+        info: 3,
+        http: 4,
+        debug: 5
     },
     colors: {
         debug: "blue",
@@ -39,8 +39,10 @@ const consoleFormat = winston.format.combine(
     })
 );
 
+const logLevel = env.nodeEnv === "development" ? "debug" : "info";
+
 const consoleTransport = new winston.transports.Console({
-    level: env.nodeEnv === "development" ? "info" : "debug",
+    level: logLevel,
     format: consoleFormat,
 });
 
@@ -56,15 +58,9 @@ const errorRotateTransport = new DailyRotateFile({
 
 const logger = winston.createLogger({
     levels: customLevels.levels,
-    level: env.nodeEnv === "development" ? "info" : "debug",
+    level: logLevel,
     format: logFormat,
     transports: [consoleTransport, errorRotateTransport]
 });
-
-if (env.nodeEnv === "development") {
-    logger.add(new winston.transports.Console({
-        format: consoleFormat
-    }));
-}
 
 export default logger;

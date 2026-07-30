@@ -1,5 +1,5 @@
 import { StoreService } from "../services/store.service.js";
-import { successResponse } from "../utils/api.response.js";
+import { successResponse, createError } from "../utils/api.response.js";
 import { asyncHandler } from "../utils/async.handler.js";
 
 export const getAllStores = asyncHandler(async (req, res) => {
