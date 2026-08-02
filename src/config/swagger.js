@@ -376,14 +376,6 @@ export const swaggerSpec = swaggerJSDoc({
                         category: {
                             type: "string",
                             example: "6a4485be97eca2972879e510"
-                        },
-                        store: {
-                            type: "string",
-                            example: "6a4485be97eca2972879e510"
-                        },
-                        orders: {
-                            type: "array",
-                            example: []
                         }
                     }
                 },
@@ -460,14 +452,6 @@ export const swaggerSpec = swaggerJSDoc({
                             example: 10
                         },
                         category: {
-                            type: "string",
-                            example: "6a4485be97eca2972879e510"
-                        },
-                        store: {
-                            type: "string",
-                            example: "6a4485be97eca2972879e510"
-                        },
-                        order: {
                             type: "string",
                             example: "6a4485be97eca2972879e510"
                         }

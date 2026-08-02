@@ -48,7 +48,7 @@ export const updateProduct = asyncHandler(async (req, res) => {
 export const deleteProduct = asyncHandler(async (req, res) => {
     const { pid } = req.params;
     if (!pid) {
-        throw new Error("ID de producto no proporcionado");
+        throw createError("INVALID_INPUT", "ID de producto no proporcionado");
     }
     const product = await ProductService.delete(pid);
     return successResponse(res, {

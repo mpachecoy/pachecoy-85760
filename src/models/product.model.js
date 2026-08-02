@@ -21,14 +21,6 @@ const ProductSchema = new mongoose.Schema(
         category: {
             type: String,
             required: true
-        },
-        store: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "Store"
-        },
-        order: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "Order"
         }
     },
     {
