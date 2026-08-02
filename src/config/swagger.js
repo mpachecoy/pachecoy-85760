@@ -131,7 +131,38 @@ export const swaggerSpec = swaggerJSDoc({
                             type: "string",
                             example: "6a4485be97eca2972879e510"
                         },
-
+                        customer: {
+                            type: "string",
+                            example: "6a4485be97eca2972879e510"
+                        },
+                        store: {
+                            type: "string",
+                            example: "6a4485be97eca2972879e510"
+                        },
+                        items: {
+                            type: "array",
+                            example: []
+                        },
+                        deliveryAddress: {
+                            type: "string",
+                            example: "Calle Falsa 123"
+                        },
+                        total: {
+                            type: "number",
+                            example: 100
+                        },
+                        status: {
+                            type: "string",
+                            example: "CREADA"
+                        },
+                        priority: {
+                            type: "string",
+                            example: "NORMAL"
+                        },
+                        proof: {
+                            type: "object",
+                            example: null
+                        }
                     }
                 },
                 OrderResponse: {
@@ -189,12 +220,40 @@ export const swaggerSpec = swaggerJSDoc({
                 OrderInput: {
                     type: "object",
                     properties: {
-                        userId: {
+                        customer: {
                             type: "string",
                             example: "6a4485be97eca2972879e510"
                         },
-
-                    }
+                        store: {
+                            type: "string",
+                            example: "6a4485be97eca2972879e510"
+                        },
+                        items: {
+                            type: "array",
+                            example: []
+                        },
+                        deliveryAddress: {
+                            type: "string",
+                            example: "Calle Falsa 123"
+                        },
+                        total: {
+                            type: "number",
+                            example: 100
+                        },
+                        status: {
+                            type: "string",
+                            example: "CREADA"
+                        },
+                        priority: {
+                            type: "string",
+                            example: "NORMAL"
+                        },
+                        proof: {
+                            type: "object",
+                            example: null
+                        }
+                    },
+                    required: ["customer", "store", "items", "deliveryAddress", "total"]
                 },
                 Delivery: {
                     type: "object",
@@ -302,13 +361,9 @@ export const swaggerSpec = swaggerJSDoc({
                             type: "string",
                             example: "6a4485be97eca2972879e510"
                         },
-                        name: {
+                        title: {
                             type: "string",
                             example: "Product 1"
-                        },
-                        description: {
-                            type: "string",
-                            example: "Description 1"
                         },
                         price: {
                             type: "number",
@@ -317,6 +372,35 @@ export const swaggerSpec = swaggerJSDoc({
                         stock: {
                             type: "number",
                             example: 10
+                        },
+                        category: {
+                            type: "string",
+                            example: "6a4485be97eca2972879e510"
+                        },
+                        store: {
+                            type: "string",
+                            example: "6a4485be97eca2972879e510"
+                        },
+                        orders: {
+                            type: "array",
+                            example: []
+                        }
+                    }
+                },
+                ProductResponse: {
+                    type: "object",
+                    properties: {
+                        status: {
+                            type: "string",
+                            example: "success"
+                        },
+                        message: {
+                            type: "string",
+                            example: "Producto obtenido correctamente"
+                        },
+                        payload: {
+                            type: "object",
+                            $ref: "#/components/schemas/Product"
                         }
                     }
                 },
@@ -359,7 +443,7 @@ export const swaggerSpec = swaggerJSDoc({
                 ProductInput: {
                     type: "object",
                     properties: {
-                        name: {
+                        title: {
                             type: "string",
                             example: "Product 1"
                         },
@@ -374,8 +458,21 @@ export const swaggerSpec = swaggerJSDoc({
                         stock: {
                             type: "number",
                             example: 10
+                        },
+                        category: {
+                            type: "string",
+                            example: "6a4485be97eca2972879e510"
+                        },
+                        store: {
+                            type: "string",
+                            example: "6a4485be97eca2972879e510"
+                        },
+                        order: {
+                            type: "string",
+                            example: "6a4485be97eca2972879e510"
                         }
-                    }
+                    },
+                    required: ["title", "description", "price", "stock", "category"]
                 },
                 Store: {
                     type: "object",
@@ -388,21 +485,17 @@ export const swaggerSpec = swaggerJSDoc({
                             type: "string",
                             example: "Store 1"
                         },
-                        description: {
-                            type: "string",
-                            example: "Description 1"
-                        },
                         address: {
                             type: "string",
                             example: "Address 1"
                         },
-                        phone: {
+                        owner: {
                             type: "string",
-                            example: "Phone 1"
+                            example: "6a4485be97eca2972879e510"
                         },
-                        email: {
-                            type: "string",
-                            example: "[EMAIL_ADDRESS]"
+                        isActive: {
+                            type: "boolean",
+                            example: true
                         }
                     }
                 },
@@ -449,23 +542,20 @@ export const swaggerSpec = swaggerJSDoc({
                             type: "string",
                             example: "Store 1"
                         },
-                        description: {
-                            type: "string",
-                            example: "Description 1"
-                        },
                         address: {
                             type: "string",
                             example: "Address 1"
                         },
-                        phone: {
+                        owner: {
                             type: "string",
-                            example: "Phone 1"
+                            example: "6a4485be97eca2972879e510"
                         },
-                        email: {
-                            type: "string",
-                            example: "[EMAIL_ADDRESS]"
+                        isActive: {
+                            type: "boolean",
+                            example: true
                         }
-                    }
+                    },
+                    required: ["name", "address", "owner"]
                 },
                 LoggerTestResponse: {
                     type: "object",
