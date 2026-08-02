@@ -4,3 +4,4 @@ logs
 uploads
 coverage
 npm-debug.log
+.env.test

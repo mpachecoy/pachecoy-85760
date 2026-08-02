@@ -40,7 +40,7 @@ app.use("/api/loggerTest", loggerTestRouter);
 
 app.use("/api/docs", docsRouter);
 
-if (env.nodeEnv === "development") {
+if (env.nodeEnv !== "production") {
   app.use("/api/mocks", mockRouter);
 };
 
