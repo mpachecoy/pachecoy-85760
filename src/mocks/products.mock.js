@@ -6,9 +6,7 @@ export const mockProduct = () => {
         description: faker.commerce.productDescription(),
         price: faker.commerce.price(),
         stock: faker.number.int({ min: 0, max: 100 }),
-        category: faker.commerce.department(),
-        store: faker.database.mongodbObjectId(),
-        order: faker.database.mongodbObjectId()
+        category: faker.commerce.department()
     };
 }
 
