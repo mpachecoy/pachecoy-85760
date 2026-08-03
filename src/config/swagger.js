@@ -253,7 +253,7 @@ export const swaggerSpec = swaggerJSDoc({
                             example: null
                         }
                     },
-                    required: ["customer", "store", "items", "deliveryAddress", "total"]
+                    required: ["customer", "store", "items", "deliveryAddress"]
                 },
                 Delivery: {
                     type: "object",

@@ -20,8 +20,8 @@ export const DeliveryService = {
     },
 
     async create(deliveryData) {
-        const { order, driver, status, priority } = deliveryData;
-        if (!order || !driver || !status || !priority) {
+        const { order, status } = deliveryData;
+        if (!order || !status) {
             throw createError("MISSING_REQUIRED_DATA");
         }
         deliveryData.assignedAt = status === ORDER_STATUS.ASSIGNED ? new Date() : null;
@@ -36,9 +36,9 @@ export const DeliveryService = {
             throw createError("DELIVERY_NOT_FOUND");
         }
 
-        const { status, priority } = deliveryUpdateData;
+        const { status } = deliveryUpdateData;
 
-        if (!status || !priority) {
+        if (!status) {
             throw createError("MISSING_REQUIRED_DATA");
         }
 

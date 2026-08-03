@@ -32,7 +32,7 @@ export const StoreService = {
         if (userOwner.role !== USER_ROLES.STORE) {
             throw createError("INVALID_ROLE");
         }
-        const activeStatus = isActive ?? false;
+        const activeStatus = isActive ?? true
         const storeToCreate = { ...storeData, isActive: activeStatus };
         return await StoreRepository.create(storeToCreate)
     },

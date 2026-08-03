@@ -35,7 +35,7 @@ export const createProduct = asyncHandler(async (req, res) => {
 export const updateProduct = asyncHandler(async (req, res) => {
     const { pid } = req.params;
     const productData = req.body;
-    if (pid) {
+    if (!pid) {
         throw createError("INVALID_INPUT", "ID de producto no proporcionado");
     }
     const product = await ProductService.update(pid, productData);
