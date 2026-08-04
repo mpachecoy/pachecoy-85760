@@ -1,15 +1,14 @@
 import DeliveryModel from "../models/delivery.model.js";
-import { DELIVERY_REFERENCES } from "../constants/index.constants.js";
 
 export const DeliveryRepository = {
     async getAll() {
-        return await DeliveryModel.find().populate(DELIVERY_REFERENCES.ORDER).populate(DELIVERY_REFERENCES.DRIVER);
+        return await DeliveryModel.find().populate("order").populate("driver");
     },
 
     async getById(id) {
         return await DeliveryModel.findById(id)
-            .populate(DELIVERY_REFERENCES.ORDER)
-            .populate(DELIVERY_REFERENCES.DRIVER);
+            .populate("order")
+            .populate("driver");
     },
 
     async create(deliveryData) {

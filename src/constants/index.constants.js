@@ -30,8 +30,3 @@ export const DOCUMENT_TYPES = Object.freeze({
     DRIVER_LICENSE: 'driver_license',
     DELIVERY_PROOF: 'delivery_proof'
 });
-
-export const DELIVERY_REFERENCES = Object.freeze({
-    ORDER: "order",
-    DRIVER: "driver"
-});

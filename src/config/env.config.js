@@ -11,7 +11,7 @@ requiredEnv.forEach((key) => {
 });
 
 export const env = {
-    port: process.env.PORT || 8080,
+    port: process.env.PORT,
     mongoURI: process.env.MONGODB_URI,
     nodeEnv: process.env.NODE_ENV || "development"
 }

@@ -20,10 +20,12 @@ export const DeliveryService = {
     },
 
     async create(deliveryData) {
-        const { order, status } = deliveryData;
-        if (!order || !status) {
+        const { order } = deliveryData;
+        if (!order) {
             throw createError("MISSING_REQUIRED_DATA");
         }
+        const status = deliveryData.status || ORDER_STATUS.CREATED;
+        deliveryData.status = status;
         deliveryData.assignedAt = status === ORDER_STATUS.ASSIGNED ? new Date() : null;
         deliveryData.deliveredAt = status === ORDER_STATUS.DELIVERED ? new Date() : null;
         return await DeliveryRepository.create(deliveryData);

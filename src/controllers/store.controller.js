@@ -38,9 +38,6 @@ export const updateStore = asyncHandler(async (req, res) => {
     if (!sid) {
         throw createError("INVALID_INPUT", "ID de comercio no proporcionado");
     }
-    if (!storeUpdateData) {
-        throw createError("INVALID_INPUT", "Datos del comercio no proporcionados");
-    }
     const store = await StoreService.update(sid, storeUpdateData);
     return successResponse(res, {
         message: `Comercio ${sid} actualizado correctamente`,

@@ -13,7 +13,7 @@ export const generateMockOrder = () => {
         customer: faker.database.mongodbObjectId(),
         store: faker.database.mongodbObjectId(),
         items: item,
-        deliveryAddress: faker.address.streetAddress(),
+        deliveryAddress: faker.location.streetAddress(),
         total: total,
         status: faker.helpers.arrayElement([ORDER_STATUS.CREATED, ORDER_STATUS.ASSIGNED, ORDER_STATUS.PICKED_UP, ORDER_STATUS.IN_TRANSIT, ORDER_STATUS.DELIVERED, ORDER_STATUS.CANCELLED]),
         priority: faker.helpers.arrayElement([DELIVERY_PRIORITY.LOW, DELIVERY_PRIORITY.NORMAL, DELIVERY_PRIORITY.HIGH]),

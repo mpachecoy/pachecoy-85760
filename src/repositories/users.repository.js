@@ -2,15 +2,15 @@ import User from "../models/user.model.js";
 
 export const UserRepository = {
     async getAll() {
-        return await User.find();
+        return await User.find().select('-password');
     },
 
     async getById(id) {
-        return await User.findById(id);
+        return await User.findById(id).select('-password');
     },
 
     async getByEmail(email) {
-        return await User.findOne({ email });
+        return await User.findOne({ email }).select('-password');
     },
 
     async create(user) {
@@ -21,7 +21,7 @@ export const UserRepository = {
         return await User.findByIdAndUpdate(id, user, {
             new: true,
             runValidators: true
-        });
+        }).select('-password');
     },
 
     async delete(id) {

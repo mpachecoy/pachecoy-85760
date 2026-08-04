@@ -4,7 +4,7 @@ import { faker } from "@faker-js/faker";
 export const mockStore = () => {
     return {
         name: faker.company.name(),
-        address: faker.address.streetAddress(),
+        address: faker.location.streetAddress(),
         owner: faker.database.mongodbObjectId()
     };
 }

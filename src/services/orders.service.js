@@ -1,4 +1,5 @@
 import { OrderRepository } from "../repositories/orders.repository.js";
+import { ProductRepository } from "../repositories/products.repository.js";
 import { ORDER_STATUS, DELIVERY_PRIORITY } from "../constants/index.constants.js";
 import { createError } from "../utils/api.response.js";
 
@@ -36,15 +37,44 @@ export const OrderService = {
         if (!storeFound) {
             throw createError("STORE_NOT_FOUND");
         }
-        const total = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
+
+        const validatedItems = [];
+        const stockUpdates = [];
+        for (const item of items) {
+            if (!item.quantity || item.quantity <= 0) {
+                throw createError("INVALID_ITEMS");
+            }
+            const product = await ProductRepository.getById(item.product);
+            if (!product) {
+                throw createError("PRODUCT_NOT_FOUND");
+            }
+            if (product.stock < item.quantity) {
+                throw createError("INVALID_ITEMS", `Stock insuficiente para el producto ${product.title}`);
+            }
+            validatedItems.push({
+                product: product._id,
+                quantity: item.quantity,
+                price: product.price
+            });
+            stockUpdates.push({ id: product._id, newStock: product.stock - item.quantity });
+        }
+
+        const total = validatedItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
         const newOrder = {
             ...orderData,
+            items: validatedItems,
             total,
             status: ORDER_STATUS.CREATED,
             priority: priority || DELIVERY_PRIORITY.NORMAL,
 
         }
-        return await OrderRepository.create(newOrder);
+        const order = await OrderRepository.create(newOrder);
+
+        for (const update of stockUpdates) {
+            await ProductRepository.update(update.id, { stock: update.newStock });
+        }
+
+        return order;
     },
 
     async updateStatusOrder(oid, status) {

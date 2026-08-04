@@ -1,17 +1,16 @@
 import OrderModel from "../models/order.model.js";
 import UserModel from "../models/user.model.js";
 import StoreModel from "../models/store.model.js";
-import { USER_ROLES } from "../constants/index.constants.js";
 
 export const OrderRepository = {
     async getAll() {
-        return await OrderModel.find().populate(USER_ROLES.CUSTOMER).populate(USER_ROLES.STORE);
+        return await OrderModel.find().populate("customer").populate("store");
     },
 
     async getById(oid) {
         return await OrderModel.findById(oid)
-            .populate(USER_ROLES.CUSTOMER)
-            .populate(USER_ROLES.STORE);
+            .populate("customer")
+            .populate("store");
     },
 
     async create(orderData) {

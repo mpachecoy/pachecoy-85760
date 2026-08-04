@@ -1,12 +1,11 @@
 import StoreModel from "../models/store.model.js";
-import { USER_ROLES } from "../constants/index.constants.js";
 
 export const StoreRepository = {
     async getAll() {
-        return await StoreModel.find().populate(USER_ROLES.OWNER);
+        return await StoreModel.find().populate("owner");
     },
     async getById(sid) {
-        return await StoreModel.findById(sid).populate(USER_ROLES.OWNER);
+        return await StoreModel.findById(sid).populate("owner");
     },
     async create(storeData) {
         return await StoreModel.create(storeData);
