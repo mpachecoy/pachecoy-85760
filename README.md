@@ -17,6 +17,9 @@ Permite administrar el ciclo completo de compra y distribución: creación de pr
 - Winston + winston-daily-rotate-file (logging estructurado con rotación diaria)
 - swagger-jsdoc + swagger-ui-express (documentación interactiva de la API)
 - @faker-js/faker (generación de datos mock, solo en desarrollo)
+- Mocha (organización y ejecución de tests)
+- Chai (aserciones)
+- Supertest (peticiones HTTP a la app sin levantar un puerto)
 
 ---
 
@@ -130,7 +133,7 @@ La API expone su documentación en **`GET /api/docs`** (Swagger UI). Está monta
 ### Módulos documentados
 
 | Módulo                          | ¿Tiene anotaciones `@swagger`?                               |
-| ------------------------------- | ------------------------------------------------------------ |
+| -------------------------------- | ------------------------------------------------------------ |
 | Users (`/api/users`)            | ✅ Sí                                                        |
 | Orders (`/api/orders`)          | ✅ Sí                                                        |
 | Deliveries (`/api/deliveries`)  | ✅ Sí                                                        |
@@ -185,7 +188,7 @@ http://localhost:8080/api/docs
 ### Stores (`/api/stores`)
 
 | Campo    | Tipo            | Notas                                              |
-| -------- | --------------- | -------------------------------------------------- |
+| -------- | --------------- | --------------------------------------------------- |
 | name     | String          | requerido                                          |
 | address  | String          | requerido                                          |
 | owner    | ObjectId → User | requerido, debe ser un usuario con `role: "store"` |
@@ -208,20 +211,22 @@ Un comercio inactivo (`isActive: false`) no puede actualizarse (`STORE_NOT_ACTIV
 ### Orders (`/api/orders`)
 
 | Campo           | Tipo                             | Notas                                                                                                |
-| --------------- | -------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| --------------- | --------------------------------- | ----------------------------------------------------------------------------------------------------- |
 | customer        | ObjectId → User                  | requerido                                                                                            |
 | store           | ObjectId → Store                 | requerido                                                                                            |
-| items           | `[{ product, quantity, price }]` | requerido, al menos 1 item                                                                           |
+| items           | `[{ product, quantity, price }]` | requerido, al menos 1 item — `price` se recalcula del lado del servidor con el precio real del producto |
 | deliveryAddress | String                           | requerido                                                                                            |
-| total           | Number                           | calculado automáticamente (`Σ price * quantity`)                                                     |
+| total           | Number                           | calculado automáticamente por el servidor (`Σ price real * quantity`), ignora el `price` enviado por el cliente |
 | status          | String                           | enum: `created`, `assigned`, `picked_up`, `in_transit`, `delivered`, `cancelled` — default `created` |
 | priority        | String                           | enum de `DELIVERY_PRIORITY` — default `normal`                                                       |
 | proof           | Object                           | default `null`                                                                                       |
 
+Al crear un pedido, el servicio valida que cada producto exista y tenga stock suficiente, y descuenta el stock vendido del producto correspondiente.
+
 ### Deliveries (`/api/deliveries`)
 
 | Campo       | Tipo             | Notas                                          |
-| ----------- | ---------------- | ---------------------------------------------- |
+| ----------- | ---------------- | ------------------------------------------------ |
 | order       | ObjectId → Order | requerido                                      |
 | driver      | ObjectId → User  | opcional                                       |
 | status      | String           | mismo enum que Order — default `created`       |
@@ -232,12 +237,9 @@ Un comercio inactivo (`isActive: false`) no puede actualizarse (`STORE_NOT_ACTIV
 ### Constantes compartidas (`src/constants/index.constants.js`)
 
 - **USER_ROLES**: `admin`, `customer`, `driver`, `store`, `user`, `owner`
-- **ORDER_STATUS**: `created`, `assigned`, `picked_up`, `in_transit`, `delivered`, `cancelled`, `pending`, `rejected`, `confirmed`, `in_progress`, `completed`
+- **ORDER_STATUS**: `created`, `assigned`, `picked_up`, `in_transit`, `delivered`, `cancelled`
 - **DELIVERY_PRIORITY**: `low`, `normal`, `high`
 - **DOCUMENT_TYPES**: `user_document`, `driver_license`, `delivery_proof`
-- **DELIVERY_REFERENCES**: `order`, `driver`
-
-> `ORDER_STATUS` define 11 valores, pero el enum de Mongoose en `order.model.js` y `delivery.model.js` solo acepta 6 (`created`, `assigned`, `picked_up`, `in_transit`, `delivered`, `cancelled`). Ver [Problemas conocidos](#problemas-conocidos).
 
 ---
 
@@ -274,7 +276,7 @@ Mismos verbos que Users, con `:pid`.
 ### Deliveries — `/api/deliveries`
 
 | Método | Ruta           | Descripción            |
-| ------ | -------------- | ---------------------- |
+| ------ | -------------- | ----------------------- |
 | GET    | `/`            | Listar entregas        |
 | GET    | `/:did`        | Obtener entrega por ID |
 | POST   | `/`            | Crear entrega          |
@@ -284,13 +286,15 @@ Mismos verbos que Users, con `:pid`.
 ### Mocks — `/api/mocks` (solo si `NODE_ENV=development`)
 
 | Método | Ruta             | Descripción                                          |
-| ------ | ---------------- | ---------------------------------------------------- |
+| ------ | ---------------- | ----------------------------------------------------- |
 | GET    | `/users/:n`      | Generar `n` usuarios falsos (no se guardan)          |
 | GET    | `/stores/:n`     | Generar `n` comercios falsos                         |
 | GET    | `/products/:n`   | Generar `n` productos falsos                         |
 | GET    | `/orders/:n`     | Generar `n` pedidos falsos                           |
 | GET    | `/deliveries/:n` | Generar `n` entregas falsas                          |
 | POST   | `/users/:n`      | Generar y **guardar** `n` usuarios falsos en la base |
+
+`n` debe ser un entero positivo — un valor no numérico, negativo o cero devuelve `400 INVALID_INPUT`.
 
 ### Utilitarios
 
@@ -331,12 +335,50 @@ Con el servidor corriendo, la documentación interactiva queda disponible en `ht
 
 ---
 
+## Testing
+
+La suite de tests funcionales vive en `test/*.test.js` y corre con **Mocha** + **Chai** (aserciones) + **Supertest** (peticiones HTTP contra la app de Express, sin necesidad de abrir un puerto real — se usa `src/app.js` directamente).
+
+### Entorno de testing separado
+
+Los tests corren contra su propio archivo de variables de entorno, `.env.test`, con una base de MongoDB **distinta** a la de desarrollo (mismo cluster, base separada por nombre) para no pisar datos reales:
+
+```
+PORT=8080
+MONGODB_URI=mongodb+srv://.../backendIII_test
+NODE_ENV=test
+```
+
+### Cómo correr los tests
+
+```bash
+npm test
+```
+
+El script (`node --env-file=.env.test node_modules/.bin/mocha`) carga esas variables de entorno antes de arrancar Mocha, que a su vez lee su configuración desde `.mocharc.json` (patrón de archivos, timeout y `require` del setup global).
+
+### Conexión y limpieza de la base de test
+
+`test/setup.js` define un **root hook plugin** (`mochaHooks`) que conecta a Mongo una sola vez antes de toda la suite y hace `dropDatabase()` + `disconnect()` al finalizar, para que cada corrida de `npm test` arranque desde una base vacía. Cada archivo de test que crea datos propios (por ejemplo `orders.test.js`, que arma un usuario + comercio + producto de prueba) además limpia esos registros puntuales en su propio `after()`, apenas termina ese módulo — no dependen de la limpieza global para no dejar basura entre archivos.
+
+### Qué cubre cada archivo
+
+| Archivo               | Cubre                                                                                                                                                                                              |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `test/utils.test.js`  | `GET /`, `GET /health`, `GET /api/docs` (redirect + Swagger UI), `GET /api/loggerTest`, y una ruta inexistente (`404 ROUTE_NOT_FOUND`)                                                            |
+| `test/users.test.js`  | Crear usuario (éxito y datos faltantes), listar usuarios, obtener por ID (éxito, 404, ID con formato inválido) — incluye la verificación de que el `password` nunca se expone en la respuesta      |
+| `test/orders.test.js` | Crear pedido (éxito, datos faltantes, producto inexistente, stock insuficiente), listar pedidos, obtener por ID, actualizar estado (éxito y estado inválido) — valida que el precio y el stock se calculan del lado del servidor, ignorando lo que mande el cliente |
+| `test/mock.test.js`   | Los 5 generadores de datos mock (`users`, `stores`, `products`, `orders`, `deliveries`), guardado real de usuarios mock en la base, y cantidades inválidas de `n` (no numérico, negativo)          |
+
+Todos los casos de error verifican tanto el status HTTP como el formato de error definido en `errors.dictionary.js` (`{ status: "error", error: "<CODIGO>", message: "..." }`).
+
+---
+
 ## Estado del proyecto / próximos pasos
 
 - Autenticación con Passport (Local/JWT) aún no integrada en las rutas de esta API (la dependencia está instalada pero no conectada a `app.js`).
 - No hay middlewares de autorización por rol todavía.
 - Los mocks (`/api/mocks`) están pensados solo para poblar datos de prueba en desarrollo; se desactivan automáticamente si `NODE_ENV` no es `development`.
-- Resolver los ítems marcados como pendientes en [Problemas conocidos](#problemas-conocidos), en particular los que rompen validaciones (`ReferenceError`) antes de seguir sumando funcionalidad.
 
 ---
 

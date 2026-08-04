@@ -14,7 +14,13 @@ export const UserRepository = {
     },
 
     async create(user) {
-        return await User.create(user);
+        const created = await User.create(user);
+        const strip = (doc) => {
+            const obj = doc.toObject();
+            delete obj.password;
+            return obj;
+        }
+        return Array.isArray(created) ? created.map(strip) : strip(created);
     },
 
     async update(id, user) {
