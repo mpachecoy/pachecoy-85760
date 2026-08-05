@@ -2,10 +2,10 @@ import StoreModel from "../models/store.model.js";
 
 export const StoreRepository = {
     async getAll() {
-        return await StoreModel.find().populate("owner");
+        return await StoreModel.find().populate("owner", "-password");
     },
     async getById(sid) {
-        return await StoreModel.findById(sid).populate("owner");
+        return await StoreModel.findById(sid).populate("owner", "-password");
     },
     async create(storeData) {
         return await StoreModel.create(storeData);

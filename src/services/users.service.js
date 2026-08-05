@@ -12,10 +12,15 @@ export const UserService = {
         return users;
     },
 
-    async getById(uid) {
+    async getById(uid, requestingUser) {
         const user = await UserRepository.getById(uid);
         if (!user) {
             throw createError("USER_NOT_FOUND");
+        }
+        const isSelf = requestingUser._id.toString() === uid;
+        const isAdmin = requestingUser.role === USER_ROLES.ADMIN;
+        if (!isSelf && !isAdmin) {
+            throw createError("FORBIDDEN");
         }
         return user;
     },
@@ -47,10 +52,18 @@ export const UserService = {
         return user;
     },
 
-    async update(uid, userData) {
+    async update(uid, userData, requestingUser) {
         const user = await UserRepository.getById(uid);
         if (!user) {
             throw createError("USER_NOT_FOUND");
+        }
+        const isSelf = requestingUser._id.toString() === uid;
+        const isAdmin = requestingUser.role === USER_ROLES.ADMIN;
+        if (!isSelf && !isAdmin) {
+            throw createError("FORBIDDEN");
+        }
+        if (userData.role && !isAdmin) {
+            throw createError("FORBIDDEN", "No podés cambiar tu propio rol");
         }
         const { email, role } = userData;
         if (email) {
@@ -68,6 +81,7 @@ export const UserService = {
         const updatedUser = await UserRepository.update(uid, userData);
         return updatedUser;
     },
+
 
     async delete(uid) {
         const user = await UserRepository.getById(uid);

@@ -16,7 +16,7 @@ export const getUserById = asyncHandler(async (req, res) => {
     if (!uid) {
         throw createError("INVALID_INPUT");
     }
-    const user = await UserService.getById(uid);
+    const user = await UserService.getById(uid, req.user);
     return successResponse(res, {
         message: `Usuario ${uid} obtenido correctamente`,
         payload: user,
@@ -39,7 +39,7 @@ export const updateUser = asyncHandler(async (req, res) => {
     if (!uid) {
         throw createError("INVALID_INPUT");
     }
-    const user = await UserService.update(uid, userData);
+    const user = await UserService.update(uid, userData, req.user);
     return successResponse(res, {
         message: `Usuario ${uid} actualizado correctamente`,
         payload: user,

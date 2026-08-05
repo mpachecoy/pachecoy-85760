@@ -1,5 +1,7 @@
 import { Router } from "express";
 import { getAllDeliveries, getDeliveryById, createDelivery, updateDelivery, deleteDelivery } from "../controllers/deliveries.controller.js";
+import { authenticate, authorizeRole } from "../middlewares/auth.middleware.js";
+import { USER_ROLES } from "../constants/index.constants.js";
 
 const router = Router();
 
@@ -19,7 +21,7 @@ const router = Router();
  *             schema:
  *               $ref: "#/components/schemas/DeliveriesResponse"
  */
-router.get("/", getAllDeliveries);
+router.get("/", authenticate, authorizeRole([USER_ROLES.ADMIN]), getAllDeliveries);
 
 /**
  * @swagger
@@ -51,7 +53,7 @@ router.get("/", getAllDeliveries);
  *             schema:
  *               $ref: "#/components/schemas/DeliveriesErrorResponse"
  */
-router.get("/:did", getDeliveryById);
+router.get("/:did", authenticate, getDeliveryById);
 
 /**
  * @swagger
@@ -75,7 +77,7 @@ router.get("/:did", getDeliveryById);
  *             schema:
  *               $ref: "#/components/schemas/DeliveryResponse"
  */
-router.post("/", createDelivery);
+router.post("/", authenticate, createDelivery);
 
 /**
  * @swagger
@@ -113,7 +115,7 @@ router.post("/", createDelivery);
  *             schema:
  *               $ref: "#/components/schemas/DeliveriesErrorResponse"
  */
-router.put("/:did/status", updateDelivery);
+router.put("/:did/status", authenticate, updateDelivery);
 
 /**
  * @swagger
@@ -145,6 +147,6 @@ router.put("/:did/status", updateDelivery);
  *             schema:
  *               $ref: "#/components/schemas/DeliveriesErrorResponse"
  */
-router.delete("/:did", deleteDelivery);
+router.delete("/:did", authenticate, authorizeRole([USER_ROLES.ADMIN]), deleteDelivery);
 
 export default router;

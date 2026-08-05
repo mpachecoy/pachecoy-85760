@@ -2,11 +2,11 @@ import ProductModel from "../models/product.model.js";
 
 export const ProductRepository = {
     async getAll() {
-        return await ProductModel.find();
+        return await ProductModel.find().populate("store");
     },
 
     async getById(pid) {
-        return await ProductModel.findById(pid);
+        return await ProductModel.findById(pid).populate("store");
     },
 
     async create(product) {

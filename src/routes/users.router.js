@@ -1,5 +1,7 @@
 import { Router } from "express";
 import { getAllUsers, getUserById, createUser, updateUser, deleteUser } from "../controllers/users.controller.js";
+import { authenticate, authorizeRole } from "../middlewares/auth.middleware.js";
+import { USER_ROLES } from "../constants/index.constants.js";
 
 const router = Router();
 
@@ -19,7 +21,7 @@ const router = Router();
  *             schema:
  *               $ref: "#/components/schemas/UsersResponse"
  */
-router.get("/", getAllUsers);
+router.get("/", authenticate, authorizeRole([USER_ROLES.ADMIN]), getAllUsers);
 
 /**
  * @swagger
@@ -51,7 +53,7 @@ router.get("/", getAllUsers);
  *             schema:
  *               $ref: "#/components/schemas/UsersErrorResponse"
  */
-router.get("/:uid", getUserById);
+router.get("/:uid", authenticate, getUserById);
 
 /**
  * @swagger
@@ -75,7 +77,7 @@ router.get("/:uid", getUserById);
  *             schema:
  *               $ref: "#/components/schemas/UserResponse"
  */
-router.post("/", createUser);
+router.post("/", authenticate, authorizeRole([USER_ROLES.ADMIN]), createUser);
 
 /**
  * @swagger
@@ -113,7 +115,7 @@ router.post("/", createUser);
  *             schema:
  *               $ref: "#/components/schemas/UsersErrorResponse"
  */
-router.put("/:uid", updateUser);
+router.put("/:uid", authenticate, updateUser);
 
 /**
  * @swagger
@@ -145,6 +147,6 @@ router.put("/:uid", updateUser);
  *             schema:
  *               $ref: "#/components/schemas/UsersErrorResponse"
  */
-router.delete("/:uid", deleteUser);
+router.delete("/:uid", authenticate, authorizeRole([USER_ROLES.ADMIN]), deleteUser);
 
 export default router;

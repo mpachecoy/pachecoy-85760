@@ -10,7 +10,7 @@ export const UserRepository = {
     },
 
     async getByEmail(email) {
-        return await User.findOne({ email }).select('-password');
+        return await User.findOne({ email });
     },
 
     async create(user) {

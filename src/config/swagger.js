@@ -1,6 +1,5 @@
 import swaggerJSDoc from "swagger-jsdoc";
 
-
 export const swaggerSpec = swaggerJSDoc({
     definition: {
         openapi: "3.0.0",
@@ -476,10 +475,22 @@ export const swaggerSpec = swaggerJSDoc({
                         owner: {
                             type: "string",
                             example: "6a4485be97eca2972879e510"
+                        }
+                    }
+                },
+                StoreResponse: {
+                    type: "object",
+                    properties: {
+                        status: {
+                            type: "string",
+                            example: "success"
                         },
-                        isActive: {
-                            type: "boolean",
-                            example: true
+                        message: {
+                            type: "string",
+                            example: "Tienda obtenida correctamente"
+                        },
+                        payload: {
+                            $ref: "#/components/schemas/Store"
                         }
                     }
                 },

@@ -24,7 +24,7 @@ export const getStoreById = asyncHandler(async (req, res) => {
 
 export const createStore = asyncHandler(async (req, res) => {
     const storeData = req.body;
-    const store = await StoreService.create(storeData);
+    const store = await StoreService.create(storeData, req.user);
     return successResponse(res, {
         statusCode: 201,
         message: "Comercio creado correctamente",
@@ -38,7 +38,7 @@ export const updateStore = asyncHandler(async (req, res) => {
     if (!sid) {
         throw createError("INVALID_INPUT", "ID de comercio no proporcionado");
     }
-    const store = await StoreService.update(sid, storeUpdateData);
+    const store = await StoreService.update(sid, storeUpdateData, req.user);
     return successResponse(res, {
         message: `Comercio ${sid} actualizado correctamente`,
         payload: store,
@@ -50,7 +50,7 @@ export const deleteStore = asyncHandler(async (req, res) => {
     if (!sid) {
         throw createError("INVALID_INPUT", "ID de comercio no proporcionado");
     }
-    const store = await StoreService.delete(sid);
+    const store = await StoreService.delete(sid, req.user);
     return successResponse(res, {
         message: `Comercio ${sid} eliminado correctamente`,
         payload: store,

@@ -10,7 +10,8 @@ Permite administrar el ciclo completo de compra y distribución: creación de pr
 
 - Node.js + Express.js
 - MongoDB + Mongoose
-- Passport (dependencia instalada, integración de autenticación pendiente)
+- Passport + passport-jwt (autenticación vía JWT)
+- jsonwebtoken (firma y verificación de tokens)
 - bcrypt (hash de contraseñas)
 - cors
 - dotenv
@@ -133,7 +134,7 @@ La API expone su documentación en **`GET /api/docs`** (Swagger UI). Está monta
 ### Módulos documentados
 
 | Módulo                          | ¿Tiene anotaciones `@swagger`?                               |
-| -------------------------------- | ------------------------------------------------------------ |
+| ------------------------------- | ------------------------------------------------------------ |
 | Users (`/api/users`)            | ✅ Sí                                                        |
 | Orders (`/api/orders`)          | ✅ Sí                                                        |
 | Deliveries (`/api/deliveries`)  | ✅ Sí                                                        |
@@ -171,6 +172,67 @@ http://localhost:8080/api/docs
 
 ---
 
+## Autenticación y autorización
+
+Toda la protección de rutas se apoya en JWT (`passport-jwt`) + un modelo de "rol + dueño del recurso" (ownership), no solo roles fijos.
+
+### Login y registro
+
+| Método | Ruta | Descripción |
+| --- | --- | --- |
+| POST | `/api/auth/register` | Registra un usuario nuevo. Ignora cualquier `role` que mande el cliente — siempre queda `customer`. Devuelve `{ user, token }`. |
+| POST | `/api/auth/login` | Verifica email + password con bcrypt. Devuelve `{ user, token }`. |
+
+El `POST /api/users` "genérico" (crear usuarios con cualquier rol, incluido `admin`) quedó reservado para admins autenticados — el alta pública de cuentas es siempre por `/api/auth/register`.
+
+### Cómo autenticarse
+
+Todas las rutas protegidas esperan el token en el header:
+
+```
+Authorization: Bearer <token>
+```
+
+`src/config/passport.config.js` define la estrategia JWT: en cada request, vuelve a buscar el usuario en la base a partir del `id` del token (no confía en el rol que venga codificado ahí) — así un usuario cuyo rol cambió, o que fue borrado, deja de tener acceso en el próximo request sin necesidad de revocar nada manualmente.
+
+Dos middlewares en `src/middlewares/auth.middleware.js`:
+
+- `authenticate` — exige un token válido. Si falta o es inválido, `401 UNAUTHORIZED`.
+- `authorizeRole([...roles])` — exige que `req.user.role` esté en la lista. Si no, `403 FORBIDDEN`.
+
+El "ownership" (¿sos vos, o el dueño de esto?) no vive en un middleware genérico — se resuelve en cada Service, comparando `req.user._id` contra el dueño real del recurso.
+
+### Matriz de permisos por módulo
+
+| Módulo | Acción | Quién puede |
+| --- | --- | --- |
+| **Users** | Listar / Crear / Borrar | solo `admin` |
+| | Ver uno / Actualizar | el propio usuario, o `admin` (un usuario no puede cambiarse su propio `role`) |
+| **Stores** | Ver (listar/uno) | público, sin token |
+| | Crear | autenticado, y el `owner` del body tiene que ser vos mismo, o `admin` |
+| | Actualizar / Borrar | el dueño de esa tienda, o `admin` |
+| **Products** | Ver (listar/uno) | público, sin token |
+| | Crear | autenticado, y la `store` del body tiene que ser tuya, o `admin` |
+| | Actualizar / Borrar | el dueño de la tienda de ese producto, o `admin` |
+| **Orders** | Listar todas | solo `admin` |
+| | Ver una | el `customer` dueño del pedido, el dueño de la `store` del pedido, o `admin` |
+| | Crear | autenticado, y el `customer` del body tiene que ser vos mismo, o `admin` |
+| | Actualizar estado | el dueño de la `store` del pedido, o `admin` (el customer no puede) |
+| | Borrar | solo `admin` |
+| **Deliveries** | Listar todas / Borrar | solo `admin` |
+| | Ver una / Actualizar estado | el `driver` asignado, el dueño de la `store` de esa orden, o `admin` |
+| | Crear | el dueño de la `store` de la orden, o `admin` |
+
+### Variable de entorno nueva
+
+```
+JWT_SECRET=<string largo y random>
+```
+
+Obligatoria — `env.config.js` no arranca la app si falta. `JWT_EXPIRES_IN` es opcional, con default `1d`.
+
+---
+
 ## Entidades implementadas
 
 ### Users (`/api/users`)
@@ -188,7 +250,7 @@ http://localhost:8080/api/docs
 ### Stores (`/api/stores`)
 
 | Campo    | Tipo            | Notas                                              |
-| -------- | --------------- | --------------------------------------------------- |
+| -------- | --------------- | -------------------------------------------------- |
 | name     | String          | requerido                                          |
 | address  | String          | requerido                                          |
 | owner    | ObjectId → User | requerido, debe ser un usuario con `role: "store"` |
@@ -205,28 +267,27 @@ Un comercio inactivo (`isActive: false`) no puede actualizarse (`STORE_NOT_ACTIV
 | price       | Number           | requerido |
 | stock       | Number           | requerido |
 | category    | String           | requerido |
-| store       | ObjectId → Store | opcional  |
-| order       | ObjectId → Order | opcional  |
+| store       | ObjectId → Store | requerido — solo el dueño de esa tienda (o admin) puede crear/editar/borrar el producto |
 
 ### Orders (`/api/orders`)
 
-| Campo           | Tipo                             | Notas                                                                                                |
-| --------------- | --------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| customer        | ObjectId → User                  | requerido                                                                                            |
-| store           | ObjectId → Store                 | requerido                                                                                            |
-| items           | `[{ product, quantity, price }]` | requerido, al menos 1 item — `price` se recalcula del lado del servidor con el precio real del producto |
-| deliveryAddress | String                           | requerido                                                                                            |
+| Campo           | Tipo                             | Notas                                                                                                           |
+| --------------- | -------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| customer        | ObjectId → User                  | requerido                                                                                                       |
+| store           | ObjectId → Store                 | requerido                                                                                                       |
+| items           | `[{ product, quantity, price }]` | requerido, al menos 1 item — `price` se recalcula del lado del servidor con el precio real del producto         |
+| deliveryAddress | String                           | requerido                                                                                                       |
 | total           | Number                           | calculado automáticamente por el servidor (`Σ price real * quantity`), ignora el `price` enviado por el cliente |
-| status          | String                           | enum: `created`, `assigned`, `picked_up`, `in_transit`, `delivered`, `cancelled` — default `created` |
-| priority        | String                           | enum de `DELIVERY_PRIORITY` — default `normal`                                                       |
-| proof           | Object                           | default `null`                                                                                       |
+| status          | String                           | enum: `created`, `assigned`, `picked_up`, `in_transit`, `delivered`, `cancelled` — default `created`            |
+| priority        | String                           | enum de `DELIVERY_PRIORITY` — default `normal`                                                                  |
+| proof           | Object                           | default `null`                                                                                                  |
 
 Al crear un pedido, el servicio valida que cada producto exista y tenga stock suficiente, y descuenta el stock vendido del producto correspondiente.
 
 ### Deliveries (`/api/deliveries`)
 
 | Campo       | Tipo             | Notas                                          |
-| ----------- | ---------------- | ------------------------------------------------ |
+| ----------- | ---------------- | ---------------------------------------------- |
 | order       | ObjectId → Order | requerido                                      |
 | driver      | ObjectId → User  | opcional                                       |
 | status      | String           | mismo enum que Order — default `created`       |
@@ -276,7 +337,7 @@ Mismos verbos que Users, con `:pid`.
 ### Deliveries — `/api/deliveries`
 
 | Método | Ruta           | Descripción            |
-| ------ | -------------- | ----------------------- |
+| ------ | -------------- | ---------------------- |
 | GET    | `/`            | Listar entregas        |
 | GET    | `/:did`        | Obtener entrega por ID |
 | POST   | `/`            | Crear entrega          |
@@ -286,7 +347,7 @@ Mismos verbos que Users, con `:pid`.
 ### Mocks — `/api/mocks` (solo si `NODE_ENV=development`)
 
 | Método | Ruta             | Descripción                                          |
-| ------ | ---------------- | ----------------------------------------------------- |
+| ------ | ---------------- | ---------------------------------------------------- |
 | GET    | `/users/:n`      | Generar `n` usuarios falsos (no se guardan)          |
 | GET    | `/stores/:n`     | Generar `n` comercios falsos                         |
 | GET    | `/products/:n`   | Generar `n` productos falsos                         |
@@ -313,9 +374,10 @@ Crear un archivo `.env` en la raíz (ver `.env.example`):
 PORT=8080
 MONGODB_URI=mongodb://localhost:27017/shipnow
 NODE_ENV=development
+JWT_SECRET=<string largo y random>
 ```
 
-Las tres son obligatorias: la app no arranca si falta alguna (`env.config.js` valida esto al inicio).
+Las cuatro son obligatorias: la app no arranca si falta alguna (`env.config.js` valida esto al inicio).
 
 ---
 
@@ -363,21 +425,22 @@ El script (`node --env-file=.env.test node_modules/.bin/mocha`) carga esas varia
 
 ### Qué cubre cada archivo
 
-| Archivo               | Cubre                                                                                                                                                                                              |
-| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `test/utils.test.js`  | `GET /`, `GET /health`, `GET /api/docs` (redirect + Swagger UI), `GET /api/loggerTest`, y una ruta inexistente (`404 ROUTE_NOT_FOUND`)                                                            |
-| `test/users.test.js`  | Crear usuario (éxito y datos faltantes), listar usuarios, obtener por ID (éxito, 404, ID con formato inválido) — incluye la verificación de que el `password` nunca se expone en la respuesta      |
-| `test/orders.test.js` | Crear pedido (éxito, datos faltantes, producto inexistente, stock insuficiente), listar pedidos, obtener por ID, actualizar estado (éxito y estado inválido) — valida que el precio y el stock se calculan del lado del servidor, ignorando lo que mande el cliente |
-| `test/mock.test.js`   | Los 5 generadores de datos mock (`users`, `stores`, `products`, `orders`, `deliveries`), guardado real de usuarios mock en la base, y cantidades inválidas de `n` (no numérico, negativo)          |
+| Archivo                    | Cubre                                                                                                                                                                                              |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `test/utils.test.js`      | `GET /`, `GET /health`, `GET /api/docs` (redirect + Swagger UI), `GET /api/loggerTest`, y una ruta inexistente (`404 ROUTE_NOT_FOUND`)                                                            |
+| `test/users.test.js`      | CRUD de usuarios con auth: creación admin-only, ver/editar propio perfil vs ajeno (403), 404, ID inválido — incluye la verificación de que el `password` nunca se expone en la respuesta          |
+| `test/stores.test.js`     | Creación (con ownership), listado/detalle público, actualización/borrado solo por el dueño o admin                                                                                                |
+| `test/products.test.js`   | Creación ligada a una `store` (con ownership), listado/detalle público, actualización/borrado solo por el dueño de la tienda o admin                                                             |
+| `test/orders.test.js`     | Creación (con ownership del `customer`, precio/stock recalculados del lado del servidor), listado admin-only, detalle (customer/store dueños o admin), actualización de estado (solo store dueña) |
+| `test/deliveries.test.js` | Creación por el dueño de la tienda de la orden, detalle/actualización por el `driver` asignado o la tienda dueña, listado/borrado admin-only                                                      |
+| `test/mock.test.js`       | Los 5 generadores de datos mock, guardado real de usuarios mock en la base, y cantidades inválidas de `n` (no numérico, negativo)                                                                 |
 
-Todos los casos de error verifican tanto el status HTTP como el formato de error definido en `errors.dictionary.js` (`{ status: "error", error: "<CODIGO>", message: "..." }`).
+Todos los casos de error verifican tanto el status HTTP como el formato de error definido en `errors.dictionary.js` (`{ status: "error", error: "<CODIGO>", message: "..." }`), incluyendo los casos de `401 UNAUTHORIZED` y `403 FORBIDDEN` de cada endpoint protegido.
 
 ---
 
 ## Estado del proyecto / próximos pasos
 
-- Autenticación con Passport (Local/JWT) aún no integrada en las rutas de esta API (la dependencia está instalada pero no conectada a `app.js`).
-- No hay middlewares de autorización por rol todavía.
 - Los mocks (`/api/mocks`) están pensados solo para poblar datos de prueba en desarrollo; se desactivan automáticamente si `NODE_ENV` no es `development`.
 
 ---

@@ -2,13 +2,13 @@ import DeliveryModel from "../models/delivery.model.js";
 
 export const DeliveryRepository = {
     async getAll() {
-        return await DeliveryModel.find().populate("order").populate("driver");
+        return await DeliveryModel.find().populate({ path: "order", populate: { path: "store" } }).populate("driver", "-password");
     },
 
     async getById(id) {
         return await DeliveryModel.findById(id)
-            .populate("order")
-            .populate("driver");
+            .populate({ path: "order", populate: { path: "store" } })
+            .populate("driver", "-password");
     },
 
     async create(deliveryData) {

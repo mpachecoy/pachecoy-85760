@@ -88,4 +88,18 @@ export const ERROR_DICTIONARY = {
         statusCode: 400,
         message: "ID inválido"
     },
+    INVALID_CREDENTIALS: {
+        statusCode: 401,
+        message: "Credenciales inválidas"
+    },
+
+    UNAUTHORIZED: {
+        statusCode: 401,
+        message: "No autenticado"
+    },
+
+    FORBIDDEN: {
+        statusCode: 403,
+        message: "No tenés permiso para realizar esta acción"
+    },
 }

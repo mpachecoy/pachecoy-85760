@@ -15,7 +15,7 @@ export const getDeliveryById = asyncHandler(async (req, res) => {
     if (!did) {
         throw createError("INVALID_INPUT", "ID de entrega no proporcionado");
     }
-    const delivery = await DeliveryService.getById(did);
+    const delivery = await DeliveryService.getById(did, req.user);
     return successResponse(res, {
         message: `Entrega ${did} obtenida correctamente`,
         payload: delivery
@@ -24,7 +24,7 @@ export const getDeliveryById = asyncHandler(async (req, res) => {
 
 export const createDelivery = asyncHandler(async (req, res) => {
     const body = req.body;
-    const delivery = await DeliveryService.create(body);
+    const delivery = await DeliveryService.create(body, req.user);
     return successResponse(res, {
         statusCode: 201,
         message: "Entrega creada correctamente",
@@ -38,7 +38,7 @@ export const updateDelivery = asyncHandler(async (req, res) => {
     if (!did) {
         throw createError("INVALID_INPUT", "ID de entrega no proporcionado");
     }
-    const updatedDelivery = await DeliveryService.update(did, updateDelivery);
+    const updatedDelivery = await DeliveryService.update(did, updateDelivery, req.user);
     return successResponse(res, {
         message: `Entrega ${did} actualizada correctamente`,
         payload: updatedDelivery

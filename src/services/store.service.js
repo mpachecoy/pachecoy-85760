@@ -20,10 +20,14 @@ export const StoreService = {
         return store;
     },
 
-    async create(storeData) {
+    async create(storeData, requestingUser) {
         const { name, address, owner, isActive } = storeData;
         if (!name || !address || !owner) {
             throw createError("MISSING_REQUIRED_DATA");
+        }
+        const isAdmin = requestingUser.role === USER_ROLES.ADMIN;
+        if (!isAdmin && owner !== requestingUser._id.toString()) {
+            throw createError("FORBIDDEN");
         }
         const userOwner = await UserRepository.getById(owner);
         if (!userOwner) {
@@ -32,27 +36,36 @@ export const StoreService = {
         if (userOwner.role !== USER_ROLES.STORE) {
             throw createError("INVALID_ROLE");
         }
-        const activeStatus = isActive ?? true
+        const activeStatus = isActive ?? true;
         const storeToCreate = { ...storeData, isActive: activeStatus };
         return await StoreRepository.create(storeToCreate)
     },
 
-    async update(sid, storeUpdateData) {
+    async update(sid, storeUpdateData, requestingUser) {
         const storeFound = await StoreRepository.getById(sid);
         if (!storeFound) {
             throw createError("STORE_NOT_FOUND");
         }
+        const isAdmin = requestingUser.role === USER_ROLES.ADMIN;
+        const isOwner = storeFound.owner._id.toString() === requestingUser._id.toString();
         if (storeFound.isActive === false) {
             throw createError("STORE_NOT_ACTIVE");
         }
-
+        if (!isAdmin && !isOwner) {
+            throw createError("FORBIDDEN");
+        }
         return await StoreRepository.update(sid, storeUpdateData);
     },
 
-    async delete(sid) {
+    async delete(sid, requestingUser) {
         const storeFound = await StoreRepository.getById(sid);
         if (!storeFound) {
             throw createError("STORE_NOT_FOUND");
+        }
+        const isAdmin = requestingUser.role === USER_ROLES.ADMIN;
+        const isOwner = storeFound.owner._id.toString() === requestingUser._id.toString();
+        if (!isAdmin && !isOwner) {
+            throw createError("FORBIDDEN");
         }
         return await StoreRepository.delete(sid);
     }
