@@ -245,4 +245,33 @@ describe("Test FUNCIONAL - Módulo Orders", () => {
             expect(response.body.error).to.equal("INVALID_STATUS");
         });
     });
+    describe("POST /api/orders/:oid/proof", () => {
+        it("Rechaza la subida sin token (401)", async () => {
+            const response = await request
+                .post(`/api/orders/${createdOrderId}/proof`)
+                .attach("proof", Buffer.from("contenido de prueba"), "comprobante.txt");
+
+            expect(response.status).to.equal(401);
+        });
+
+        it("Rechaza la subida si no sos el dueño de la tienda ni admin (403)", async () => {
+            const response = await request
+                .post(`/api/orders/${createdOrderId}/proof`)
+                .set("Authorization", `Bearer ${customerToken}`)
+                .attach("proof", Buffer.from("contenido de prueba"), "comprobante.txt");
+
+            expect(response.status).to.equal(403);
+        });
+
+        it("El dueño de la tienda sube el comprobante", async () => {
+            const response = await request
+                .post(`/api/orders/${createdOrderId}/proof`)
+                .set("Authorization", `Bearer ${storeOwnerToken}`)
+                .attach("proof", Buffer.from("contenido de prueba"), "comprobante.txt");
+
+            expect(response.status).to.equal(200);
+            expect(response.body.payload.proof).to.be.an("array").with.lengthOf(1);
+            expect(response.body.payload.proof[0].type).to.equal("delivery_proof");
+        });
+    });
 });

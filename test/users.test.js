@@ -12,6 +12,7 @@ describe("Test FUNCIONAL - Módulo Users", () => {
     let adminUser, adminToken;
     let otherUser, otherToken;
     let createdUserId, ownToken;
+    let driverUser, driverToken;
 
     before(async () => {
         adminUser = await UserModel.create({
@@ -31,10 +32,19 @@ describe("Test FUNCIONAL - Módulo Users", () => {
             role: USER_ROLES.CUSTOMER
         });
         otherToken = generateToken(otherUser);
+
+        driverUser = await UserModel.create({
+            firstName: "Chofer",
+            lastName: "Test",
+            email: `chofer.${Date.now()}@mail.com`,
+            password: "clave123",
+            role: USER_ROLES.DRIVER
+        });
+        driverToken = generateToken(driverUser);
     });
 
     after(async () => {
-        const ids = [adminUser._id, otherUser._id];
+        const ids = [adminUser._id, otherUser._id, driverUser._id];
         if (createdUserId) ids.push(createdUserId);
         await UserModel.deleteMany({ _id: { $in: ids } });
     });
@@ -163,6 +173,60 @@ describe("Test FUNCIONAL - Módulo Users", () => {
 
             expect(response.status).to.equal(400);
             expect(response.body.error).to.equal("INVALID_ID");
+        });
+    });
+    describe("POST /api/users/:uid/document", () => {
+        it("Rechaza la subida sin token (401)", async () => {
+            const response = await request
+                .post(`/api/users/${createdUserId}/document`)
+                .field("type", "user_document")
+                .attach("document", Buffer.from("contenido de prueba"), "doc.txt");
+
+            expect(response.status).to.equal(401);
+        });
+
+        it("Rechaza subir un documento al perfil de otro usuario (403)", async () => {
+            const response = await request
+                .post(`/api/users/${createdUserId}/document`)
+                .set("Authorization", `Bearer ${otherToken}`)
+                .field("type", "user_document")
+                .attach("document", Buffer.from("contenido de prueba"), "doc.txt");
+
+            expect(response.status).to.equal(403);
+        });
+
+        it("Rechaza cargar una licencia si el usuario no es driver (400)", async () => {
+            const response = await request
+                .post(`/api/users/${createdUserId}/document`)
+                .set("Authorization", `Bearer ${ownToken}`)
+                .field("type", "driver_license")
+                .attach("document", Buffer.from("contenido de prueba"), "licencia.txt");
+
+            expect(response.status).to.equal(403);
+            expect(response.body.error).to.equal("FORBIDDEN");
+        });
+
+        it("El propio usuario puede subir un documento genérico", async () => {
+            const response = await request
+                .post(`/api/users/${createdUserId}/document`)
+                .set("Authorization", `Bearer ${ownToken}`)
+                .field("type", "user_document")
+                .attach("document", Buffer.from("contenido de prueba"), "doc.txt");
+
+            expect(response.status).to.equal(200);
+            expect(response.body.payload.documents).to.be.an("array").with.lengthOf(1);
+            expect(response.body.payload.documents[0].type).to.equal("user_document");
+        });
+
+        it("Un driver puede subir su propia licencia", async () => {
+            const response = await request
+                .post(`/api/users/${driverUser._id}/document`)
+                .set("Authorization", `Bearer ${driverToken}`)
+                .field("type", "driver_license")
+                .attach("document", Buffer.from("contenido de prueba"), "licencia.txt");
+
+            expect(response.status).to.equal(200);
+            expect(response.body.payload.documents[0].type).to.equal("driver_license");
         });
     });
 });

@@ -65,9 +65,9 @@ export const uploadUserDocuments = asyncHandler(async (req, res) => {
     if (!uid) {
         throw createError("INVALID_INPUT");
     }
-    const user = await UserService.uploadDocuments(uid, file, type);
+    const user = await UserService.uploadDocuments(uid, file, type, req.user);
     return successResponse(res, {
         message: `Documentos del usuario ${uid} subidos correctamente`,
-        payload: user,
+        payload: user
     });
 });

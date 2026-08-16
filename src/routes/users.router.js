@@ -193,7 +193,7 @@ router.delete("/:uid", authenticate, authorizeRole([USER_ROLES.ADMIN]), deleteUs
  *             schema:
  *               $ref: "#/components/schemas/UsersErrorResponse"
  */
-router.post("/:uid/document", upload.single("document"), uploadUserDocuments);
+router.post("/:uid/document", authenticate, upload.single("document"), uploadUserDocuments);
 
 
 export default router;

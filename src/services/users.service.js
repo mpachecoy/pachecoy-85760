@@ -82,7 +82,7 @@ export const UserService = {
         return updatedUser;
     },
 
-    async uploadDocuments(uid, file, type) {
+    async uploadDocuments(uid, file, type, requestingUser) {
         if (!file) {
             throw createError("FILE_REQUIRED");
         }
@@ -92,6 +92,15 @@ export const UserService = {
         const user = await UserRepository.getById(uid);
         if (!user) {
             throw createError("USER_NOT_FOUND");
+        }
+        const isSelf = requestingUser._id.toString() === uid;
+        const isAdmin = requestingUser.role === USER_ROLES.ADMIN;
+
+        if (!isSelf && !isAdmin) {
+            throw createError("FORBIDDEN");
+        }
+        if (type === DOCUMENT_TYPES.DRIVER_LICENSE && user.role !== USER_ROLES.DRIVER) {
+            throw createError("FORBIDDEN", "No podés subir este tipo de documento");
         }
 
         const document = {

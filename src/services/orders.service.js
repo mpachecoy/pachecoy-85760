@@ -1,6 +1,6 @@
 import { OrderRepository } from "../repositories/orders.repository.js";
 import { ProductRepository } from "../repositories/products.repository.js";
-import { ORDER_STATUS, DELIVERY_PRIORITY, USER_ROLES } from "../constants/index.constants.js";
+import { ORDER_STATUS, DELIVERY_PRIORITY, USER_ROLES, DOCUMENT_TYPES } from "../constants/index.constants.js";
 import { createError } from "../utils/api.response.js";
 
 export const OrderService = {
@@ -103,6 +103,32 @@ export const OrderService = {
             throw createError("INVALID_STATUS");
         }
         const updatedOrder = await OrderRepository.updateStatusOrder(oid, status);
+        return updatedOrder;
+    },
+
+    async uploadProof(oid, file, requestingUser) {
+        if (!file) {
+            throw createError("FILE_REQUIRED");
+        }
+        const order = await OrderRepository.getById(oid);
+        if (!order) {
+            throw createError("ORDER_NOT_FOUND");
+        }
+        const isAdmin = requestingUser.role === USER_ROLES.ADMIN;
+        const isStoreOwner = order.store.owner.toString() === requestingUser._id.toString();
+        if (!isAdmin && !isStoreOwner) {
+            throw createError("FORBIDDEN");
+        }
+        const proofDocument = {
+            originalName: file.originalname,
+            fileName: file.filename,
+            path: file.path,
+            mimeType: file.mimetype,
+            size: file.size,
+            type: DOCUMENT_TYPES.DELIVERY_PROOF
+        }
+        const proof = [...order.proof, proofDocument]
+        const updatedOrder = await OrderRepository.update(oid, { proof });
         return updatedOrder;
     },
 

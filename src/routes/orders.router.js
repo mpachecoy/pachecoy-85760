@@ -1,7 +1,8 @@
 import { Router } from "express";
-import { getAllOrders, getOrderById, createOrder, updateOrder, deleteOrder } from "../controllers/orders.controller.js";
+import { getAllOrders, getOrderById, createOrder, updateOrder, deleteOrder, uploadOrderProof } from "../controllers/orders.controller.js";
 import { authenticate, authorizeRole } from "../middlewares/auth.middleware.js";
 import { USER_ROLES } from "../constants/index.constants.js";
+import upload from "../middlewares/upload.middleware.js";
 
 const router = Router();
 
@@ -148,6 +149,8 @@ router.put("/:oid/status", authenticate, updateOrder);
  *               $ref: "#/components/schemas/OrdersErrorResponse"
  */
 router.delete("/:oid", authenticate, authorizeRole([USER_ROLES.ADMIN]), deleteOrder);
+
+router.post("/:oid/proof", authenticate, upload.single("proof"), uploadOrderProof)
 
 
 export default router;

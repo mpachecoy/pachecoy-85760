@@ -34,5 +34,12 @@ export const OrderRepository = {
 
     async getStoreById(sid) {
         return await StoreModel.findById(sid);
-    }
+    },
+
+    async update(oid, orderData) {
+        return await OrderModel.findByIdAndUpdate(oid, orderData, {
+            new: true,
+            runValidators: true
+        });
+    },
 }

@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { ORDER_STATUS, DELIVERY_PRIORITY } from "../constants/index.constants.js";
+import documentsSchema from "./documents.model.js";
 
 const orderItemSchema = new mongoose.Schema(
   {
@@ -57,8 +58,8 @@ const orderSchema = new mongoose.Schema(
     proof: {
       // Permitir la carga de una imagen
 
-      type: Object,
-      default: null
+      type: [documentsSchema],
+      default: []
     }
   },
   {

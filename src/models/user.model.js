@@ -1,43 +1,6 @@
 import mongoose from "mongoose";
 import { USER_ROLES } from "../constants/index.constants.js";
-
-const documentsSchema = new mongoose.Schema(
-  {
-    originalName: {
-      type: String,
-      required: true
-    },
-    fileName: {
-      type: String,
-      required: true
-    },
-    path: {
-      type: String,
-      required: true
-    },
-    mimeType: {
-      type: String,
-      required: true
-    },
-    size: {
-      type: Number,
-      required: true
-    },
-    //Declara que tipo de archivo es para nosotros
-    type: {
-      type: String,
-      required: true
-    },
-    uploadedAt: {
-      type: Date,
-      default: Date.now
-    }
-  },
-  {
-    _id: false,
-    timestamps: true
-  }
-);
+import documentsSchema from "./documents.model.js";
 
 const userSchema = new mongoose.Schema(
   {

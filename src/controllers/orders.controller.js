@@ -45,6 +45,19 @@ export const updateOrder = asyncHandler(async (req, res) => {
     });
 });
 
+export const uploadOrderProof = asyncHandler(async (req, res) => {
+    const { oid } = req.params;
+    const file = req.file;
+    if (!oid) {
+        throw createError("INVALID_INPUT", "ID de pedido no proporcionado");
+    }
+    const order = await OrderService.uploadProof(oid, file, req.user);
+    return successResponse(res, {
+        message: `Comprobante del pedido ${oid} subido correctamente`,
+        payload: order
+    });
+});
+
 export const deleteOrder = asyncHandler(async (req, res) => {
     const { oid } = req.params;
     if (!oid) {
