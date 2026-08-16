@@ -16,7 +16,7 @@ export const getUserById = asyncHandler(async (req, res) => {
     if (!uid) {
         throw createError("INVALID_INPUT");
     }
-    const user = await UserService.getById(uid);
+    const user = await UserService.getById(uid, req.user);
     return successResponse(res, {
         message: `Usuario ${uid} obtenido correctamente`,
         payload: user,
@@ -39,7 +39,7 @@ export const updateUser = asyncHandler(async (req, res) => {
     if (!uid) {
         throw createError("INVALID_INPUT");
     }
-    const user = await UserService.update(uid, userData);
+    const user = await UserService.update(uid, userData, req.user);
     return successResponse(res, {
         message: `Usuario ${uid} actualizado correctamente`,
         payload: user,
@@ -54,6 +54,20 @@ export const deleteUser = asyncHandler(async (req, res) => {
     const user = await UserService.delete(uid);
     return successResponse(res, {
         message: `Usuario ${uid} eliminado correctamente`,
+        payload: user,
+    });
+});
+
+export const uploadUserDocuments = asyncHandler(async (req, res) => {
+    const { uid } = req.params;
+    const file = req.file;
+    const { type } = req.body;
+    if (!uid) {
+        throw createError("INVALID_INPUT");
+    }
+    const user = await UserService.uploadDocuments(uid, file, type);
+    return successResponse(res, {
+        message: `Documentos del usuario ${uid} subidos correctamente`,
         payload: user,
     });
 });

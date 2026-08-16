@@ -54,6 +54,36 @@
             "date": 1785851864911,
             "name": "error.2026-08-04.log",
             "hash": "9240b34b9e11f3364a7766af2d545a0d8bfe531bda302673282c6b9ee17fff68"
+        },
+        {
+            "date": 1785900117156,
+            "name": "error.2026-08-05.log",
+            "hash": "22dfc75b00ccd3e5438904b7835f9763abe1afb827529ae339aff4998c02a91b"
+        },
+        {
+            "date": 1786022596531,
+            "name": "error.2026-08-06.log",
+            "hash": "3ed66da9be9d56495a7853d26d4307aff2e0e19a62a480f47f58ce58f8250d60"
+        },
+        {
+            "date": 1786400243317,
+            "name": "error.2026-08-10.log",
+            "hash": "89ef2d43a3ea97aa4184bf9e41f18cfad43feb3319142e342220ff0da24a48b0"
+        },
+        {
+            "date": 1786478922166,
+            "name": "error.2026-08-11.log",
+            "hash": "94f23d69a1614845954ee6ac6fa76fdb64ab1a4310cec1bb8b1364e8746ea60a"
+        },
+        {
+            "date": 1786632888470,
+            "name": "error.2026-08-13.log",
+            "hash": "590157f75d150cd075ebde5f8c62c4eff06e9a4c546d4dda79a4cbadc5194daa"
+        },
+        {
+            "date": 1786885821807,
+            "name": "error.2026-08-16.log",
+            "hash": "56d2c7f4055c119f84cf342b4c57f3d12f69a8d39af1f74f479708fc86f385f4"
         }
     ],
     "hashType": "sha256"

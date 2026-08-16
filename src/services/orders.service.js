@@ -1,6 +1,6 @@
 import { OrderRepository } from "../repositories/orders.repository.js";
 import { ProductRepository } from "../repositories/products.repository.js";
-import { ORDER_STATUS, DELIVERY_PRIORITY } from "../constants/index.constants.js";
+import { ORDER_STATUS, DELIVERY_PRIORITY, USER_ROLES } from "../constants/index.constants.js";
 import { createError } from "../utils/api.response.js";
 
 export const OrderService = {
@@ -12,19 +12,30 @@ export const OrderService = {
         return orders;
     },
 
-    async getById(oid) {
+    async getById(oid, requestingUser) {
         const order = await OrderRepository.getById(oid);
         if (!order) {
             throw createError("ORDER_NOT_FOUND");
+        }
+        const isAdmin = requestingUser.role === USER_ROLES.ADMIN;
+        const isCustomerOwner = order.customer._id.toString() === requestingUser._id.toString();
+        const isStoreOwner = order.store.owner.toString() === requestingUser._id.toString();
+
+        if (!isAdmin && !isCustomerOwner && !isStoreOwner) {
+            throw createError("FORBIDDEN");
         }
         return order;
     },
 
 
-    async create(orderData) {
+    async create(orderData, requestingUser) {
         const { customer, store, items, deliveryAddress, priority } = orderData;
         if (!customer || !store || !items || !deliveryAddress) {
             throw createError("MISSING_REQUIRED_DATA");
+        }
+        const isAdmin = requestingUser.role === USER_ROLES.ADMIN;
+        if (!isAdmin && customer !== requestingUser._id.toString()) {
+            throw createError("FORBIDDEN", "No podés crear un pedido a nombre de otro usuario");
         }
         if (!Array.isArray(items) || items.length === 0) {
             throw createError("INVALID_ITEMS");
@@ -77,10 +88,15 @@ export const OrderService = {
         return order;
     },
 
-    async updateStatusOrder(oid, status) {
+    async updateStatusOrder(oid, status, requestingUser) {
         const order = await OrderRepository.getById(oid);
         if (!order) {
             throw createError("ORDER_NOT_FOUND");
+        }
+        const isAdmin = requestingUser.role === USER_ROLES.ADMIN;
+        const isStoreOwner = order.store.owner.toString() === requestingUser._id.toString();
+        if (!isAdmin && !isStoreOwner) {
+            throw createError("FORBIDDEN");
         }
         const validStatuses = Object.values(ORDER_STATUS);
         if (!validStatuses.includes(status)) {

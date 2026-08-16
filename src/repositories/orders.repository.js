@@ -4,12 +4,12 @@ import StoreModel from "../models/store.model.js";
 
 export const OrderRepository = {
     async getAll() {
-        return await OrderModel.find().populate("customer").populate("store");
+        return await OrderModel.find().populate("customer", "-password").populate("store");
     },
 
     async getById(oid) {
         return await OrderModel.findById(oid)
-            .populate("customer")
+            .populate("customer", "-password")
             .populate("store");
     },
 

@@ -1,5 +1,7 @@
 import { Router } from "express";
 import { getAllOrders, getOrderById, createOrder, updateOrder, deleteOrder } from "../controllers/orders.controller.js";
+import { authenticate, authorizeRole } from "../middlewares/auth.middleware.js";
+import { USER_ROLES } from "../constants/index.constants.js";
 
 const router = Router();
 
@@ -19,7 +21,7 @@ const router = Router();
  *             schema:
  *               $ref: "#/components/schemas/OrdersResponse"
  */
-router.get("/", getAllOrders);
+router.get("/", authenticate, authorizeRole([USER_ROLES.ADMIN]), getAllOrders);
 
 /**
  * @swagger
@@ -51,7 +53,7 @@ router.get("/", getAllOrders);
  *             schema:
  *               $ref: "#/components/schemas/OrdersErrorResponse"
  */
-router.get("/:oid", getOrderById);
+router.get("/:oid", authenticate, getOrderById);
 
 /**
  * @swagger
@@ -75,7 +77,7 @@ router.get("/:oid", getOrderById);
  *             schema:
  *               $ref: "#/components/schemas/OrderResponse"
  */
-router.post("/", createOrder);
+router.post("/", authenticate, createOrder);
 
 /**
  * @swagger
@@ -113,7 +115,7 @@ router.post("/", createOrder);
  *             schema:
  *               $ref: "#/components/schemas/OrdersErrorResponse"
  */
-router.put("/:oid/status", updateOrder);
+router.put("/:oid/status", authenticate, updateOrder);
 
 /**
  * @swagger
@@ -145,7 +147,7 @@ router.put("/:oid/status", updateOrder);
  *             schema:
  *               $ref: "#/components/schemas/OrdersErrorResponse"
  */
-router.delete("/:oid", deleteOrder);
+router.delete("/:oid", authenticate, authorizeRole([USER_ROLES.ADMIN]), deleteOrder);
 
 
 export default router;

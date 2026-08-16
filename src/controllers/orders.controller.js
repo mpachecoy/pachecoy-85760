@@ -15,7 +15,7 @@ export const getOrderById = asyncHandler(async (req, res) => {
     if (!oid) {
         throw createError("INVALID_INPUT", "ID de pedido no proporcionado");
     }
-    const order = await OrderService.getById(oid);
+    const order = await OrderService.getById(oid, req.user);
     return successResponse(res, {
         message: `Pedido ${oid} obtenido correctamente`,
         payload: order
@@ -24,7 +24,7 @@ export const getOrderById = asyncHandler(async (req, res) => {
 
 export const createOrder = asyncHandler(async (req, res) => {
     const orderData = req.body;
-    const order = await OrderService.create(orderData);
+    const order = await OrderService.create(orderData, req.user);
     return successResponse(res, {
         statusCode: 201,
         message: "Pedido creado correctamente",
@@ -38,7 +38,7 @@ export const updateOrder = asyncHandler(async (req, res) => {
     if (!oid) {
         throw createError("INVALID_INPUT", "ID de pedido no proporcionado");
     }
-    const order = await OrderService.updateStatusOrder(oid, status);
+    const order = await OrderService.updateStatusOrder(oid, status, req.user);
     return successResponse(res, {
         message: `Pedido ${oid} actualizado correctamente`,
         payload: order

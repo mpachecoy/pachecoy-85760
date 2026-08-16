@@ -1,5 +1,8 @@
 import { Router } from "express";
-import { getAllUsers, getUserById, createUser, updateUser, deleteUser } from "../controllers/users.controller.js";
+import { getAllUsers, getUserById, createUser, updateUser, deleteUser, uploadUserDocuments } from "../controllers/users.controller.js";
+import { authenticate, authorizeRole } from "../middlewares/auth.middleware.js";
+import { USER_ROLES } from "../constants/index.constants.js";
+import upload from "../middlewares/upload.middleware.js";
 
 const router = Router();
 
@@ -19,7 +22,7 @@ const router = Router();
  *             schema:
  *               $ref: "#/components/schemas/UsersResponse"
  */
-router.get("/", getAllUsers);
+router.get("/", authenticate, authorizeRole(USER_ROLES.ADMIN), getAllUsers);
 
 /**
  * @swagger
@@ -51,7 +54,7 @@ router.get("/", getAllUsers);
  *             schema:
  *               $ref: "#/components/schemas/UsersErrorResponse"
  */
-router.get("/:uid", getUserById);
+router.get("/:uid", authenticate, getUserById);
 
 /**
  * @swagger
@@ -75,7 +78,7 @@ router.get("/:uid", getUserById);
  *             schema:
  *               $ref: "#/components/schemas/UserResponse"
  */
-router.post("/", createUser);
+router.post("/", authenticate, authorizeRole([USER_ROLES.ADMIN]), createUser);
 
 /**
  * @swagger
@@ -113,7 +116,7 @@ router.post("/", createUser);
  *             schema:
  *               $ref: "#/components/schemas/UsersErrorResponse"
  */
-router.put("/:uid", updateUser);
+router.put("/:uid", authenticate, updateUser);
 
 /**
  * @swagger
@@ -145,6 +148,52 @@ router.put("/:uid", updateUser);
  *             schema:
  *               $ref: "#/components/schemas/UsersErrorResponse"
  */
-router.delete("/:uid", deleteUser);
+router.delete("/:uid", authenticate, authorizeRole([USER_ROLES.ADMIN]), deleteUser);
+
+// CARGA DE DOCUMENTOS
+//Controla swagger
+/**
+ * @swagger
+ * /api/users/{uid}/documents:
+ *   post:
+ *     summary: Sube un documento al perfil del usuario.
+ *     description: Sube un documento al perfil del usuario.
+ *     tags:
+ *       - Users
+ *     parameters: 
+ *       - in: path
+ *         name: uid
+ *         schema: 
+ *           type: string
+ *         example: 6a4485be97eca2972879e510
+ *         required: true
+ *         description: ID del usuario
+ *     requestBody:
+ *       required: true
+ *       content: 
+ *         multipart/form-data: 
+ *           schema: 
+ *             type: object
+ *             properties: 
+ *               document: 
+ *                 type: string
+ *                 format: binary
+ *                 description: Archivo del documento a subir
+ *     responses: 
+ *       200:
+ *         description: Documento subido exitosamente.
+ *         content: 
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/UserResponse"
+ *       404:
+ *         description: Usuario no encontrado.
+ *         content: 
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/UsersErrorResponse"
+ */
+router.post("/:uid/document", upload.single("document"), uploadUserDocuments);
+
 
 export default router;

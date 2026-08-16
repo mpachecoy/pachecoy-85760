@@ -88,4 +88,43 @@ export const ERROR_DICTIONARY = {
         statusCode: 400,
         message: "ID inválido"
     },
+    INVALID_CREDENTIALS: {
+        statusCode: 401,
+        message: "Credenciales inválidas"
+    },
+
+    UNAUTHORIZED: {
+        statusCode: 401,
+        message: "No autenticado"
+    },
+
+    FORBIDDEN: {
+        statusCode: 403,
+        message: "No tenés permiso para realizar esta acción"
+    },
+
+    FILE_REQUIRED: {
+        statusCode: 400,
+        message: "Archivo requerido"
+    },
+
+    INVALID_DOCUMENT_TYPE: {
+        statusCode: 400,
+        message: "Tipo de documento inválido"
+    },
+
+    INVALID_FILE_TYPE: {
+        statusCode: 400,
+        message: "Tipo de archivo inválido"
+    },
+
+    INVALID_FILE_SIZE: {
+        statusCode: 400,
+        message: "Tamaño de archivo inválido"
+    },
+
+    INVALID_REFRESH_TOKEN: {
+        statusCode: 401,
+        message: "Token de refresh inválido o expirado"
+    }
 }

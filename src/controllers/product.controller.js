@@ -24,7 +24,7 @@ export const getProductById = asyncHandler(async (req, res) => {
 
 export const createProduct = asyncHandler(async (req, res) => {
     const productData = req.body;
-    const product = await ProductService.create(productData);
+    const product = await ProductService.create(productData, req.user);
     return successResponse(res, {
         statusCode: 201,
         message: "Producto creado correctamente",
@@ -38,7 +38,7 @@ export const updateProduct = asyncHandler(async (req, res) => {
     if (!pid) {
         throw createError("INVALID_INPUT", "ID de producto no proporcionado");
     }
-    const product = await ProductService.update(pid, productData);
+    const product = await ProductService.update(pid, productData, req.user);
     return successResponse(res, {
         message: "Producto actualizado correctamente",
         payload: product
@@ -50,7 +50,7 @@ export const deleteProduct = asyncHandler(async (req, res) => {
     if (!pid) {
         throw createError("INVALID_INPUT", "ID de producto no proporcionado");
     }
-    const product = await ProductService.delete(pid);
+    const product = await ProductService.delete(pid, req.user);
     return successResponse(res, {
         message: "Producto eliminado correctamente",
         payload: product

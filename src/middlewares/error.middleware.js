@@ -22,6 +22,9 @@ const normalizeError = (error) => {
     if (error.type === "entity.parse.failed" || error instanceof SyntaxError) {
         return createError("BAD_REQUEST", "El cuerpo de la petición no es un JSON válido");
     }
+    if (error.code === "LIMIT_FILE_SIZE") {
+        return createError("INVALID_FILE_SIZE", "El tamaño del archivo excede el límite permitido");
+    }
 
     return createError("INTERNAL_SERVER_ERROR", error.message);
 };

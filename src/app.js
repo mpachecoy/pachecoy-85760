@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import passport from "passport";
 import usersRouter from "./routes/users.router.js";
 import storesRouter from "./routes/stores.router.js";
 import ordersRouter from "./routes/orders.router.js";
@@ -8,6 +9,7 @@ import productsRouter from "./routes/products.router.js";
 import loggerTestRouter from "./routes/loggerTest.router.js";
 import mockRouter from "./routes/mock.router.js";
 import docsRouter from "./routes/docs.router.js";
+import authRouter from "./routes/auth.router.js";
 import { errorHandler, notFoundHandler } from "./middlewares/error.middleware.js";
 import { env } from "./config/env.config.js";
 
@@ -15,6 +17,7 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use(passport.initialize());
 
 app.get("/", (req, res) => {
   res.json({
@@ -35,6 +38,7 @@ app.use("/api/stores", storesRouter);
 app.use("/api/orders", ordersRouter);
 app.use("/api/deliveries", deliveriesRouter);
 app.use("/api/products", productsRouter);
+app.use("/api/auth", authRouter);
 
 app.use("/api/loggerTest", loggerTestRouter);
 

@@ -1,5 +1,5 @@
 import { UserRepository } from "../repositories/users.repository.js";
-import { USER_ROLES } from "../constants/index.constants.js";
+import { DOCUMENT_TYPES, USER_ROLES } from "../constants/index.constants.js";
 import { createError } from "../utils/api.response.js";
 import bcrypt from "bcrypt";
 
@@ -12,10 +12,15 @@ export const UserService = {
         return users;
     },
 
-    async getById(uid) {
+    async getById(uid, requestingUser) {
         const user = await UserRepository.getById(uid);
         if (!user) {
             throw createError("USER_NOT_FOUND");
+        }
+        const isSelf = requestingUser._id.toString() === uid;
+        const isAdmin = requestingUser.role === USER_ROLES.ADMIN;
+        if (!isSelf && !isAdmin) {
+            throw createError("FORBIDDEN");
         }
         return user;
     },
@@ -47,10 +52,18 @@ export const UserService = {
         return user;
     },
 
-    async update(uid, userData) {
+    async update(uid, userData, requestingUser) {
         const user = await UserRepository.getById(uid);
         if (!user) {
             throw createError("USER_NOT_FOUND");
+        }
+        const isSelf = requestingUser._id.toString() === uid;
+        const isAdmin = requestingUser.role === USER_ROLES.ADMIN;
+        if (!isSelf && !isAdmin) {
+            throw createError("FORBIDDEN");
+        }
+        if (userData.role && !isAdmin) {
+            throw createError("FORBIDDEN", "No podés cambiar tu propio rol");
         }
         const { email, role } = userData;
         if (email) {
@@ -66,6 +79,33 @@ export const UserService = {
             }
         }
         const updatedUser = await UserRepository.update(uid, userData);
+        return updatedUser;
+    },
+
+    async uploadDocuments(uid, file, type) {
+        if (!file) {
+            throw createError("FILE_REQUIRED");
+        }
+        if (!Object.values(DOCUMENT_TYPES).includes(type)) {
+            throw createError("INVALID_DOCUMENT_TYPE");
+        }
+        const user = await UserRepository.getById(uid);
+        if (!user) {
+            throw createError("USER_NOT_FOUND");
+        }
+
+        const document = {
+            originalName: file.originalname,
+            fileName: file.filename,
+            path: file.path,
+            mimeType: file.mimetype,
+            size: file.size,
+            type
+        }
+
+        const documents = [...user.documents, document];
+
+        const updatedUser = await UserRepository.update(uid, { documents });
         return updatedUser;
     },
 

@@ -55,6 +55,8 @@ const orderSchema = new mongoose.Schema(
       default: DELIVERY_PRIORITY.NORMAL
     },
     proof: {
+      // Permitir la carga de una imagen
+
       type: Object,
       default: null
     }
