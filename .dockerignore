@@ -1,2 +1,13 @@
 node_modules
 .env
+.env.test
+.env.example
+.git
+test
+uploads
+error.*.log
+*.log
+README.md
+.mocharc.json
+.DS_Store
+.aa10590a5e09508dd8da14b6020f490c7f4cfc59-audit.json
