@@ -10,9 +10,13 @@ Permite administrar el ciclo completo de compra y distribución: creación de pr
 
 - Node.js + Express.js
 - MongoDB + Mongoose
-- Passport + passport-jwt (autenticación vía JWT)
+- Passport + passport-jwt (autenticación vía JWT en cookies httpOnly)
+- passport-github2 (login social con GitHub OAuth2)
 - jsonwebtoken (firma y verificación de tokens)
+- cookie-parser (lectura de cookies en cada request)
 - bcrypt (hash de contraseñas)
+- helmet (headers de seguridad HTTP)
+- multer (carga de archivos multipart/form-data)
 - cors
 - dotenv
 - Winston + winston-daily-rotate-file (logging estructurado con rotación diaria)
@@ -21,6 +25,7 @@ Permite administrar el ciclo completo de compra y distribución: creación de pr
 - Mocha (organización y ejecución de tests)
 - Chai (aserciones)
 - Supertest (peticiones HTTP a la app sin levantar un puerto)
+- Docker (`dockerfile` + `.dockerignore` en la raíz)
 
 ---
 
@@ -174,30 +179,43 @@ http://localhost:8080/api/docs
 
 ## Autenticación y autorización
 
-Toda la protección de rutas se apoya en JWT (`passport-jwt`) + un modelo de "rol + dueño del recurso" (ownership), no solo roles fijos.
+Toda la protección de rutas se apoya en JWT (`passport-jwt`) + un modelo de "rol + dueño del recurso" (ownership), no solo roles fijos. Los tokens viajan en **cookies `httpOnly`**, no en el header `Authorization` — el JWT nunca es accesible desde JavaScript del lado del cliente.
 
-### Login y registro
+### Login, registro, refresh y logout
 
 | Método | Ruta | Descripción |
 | --- | --- | --- |
-| POST | `/api/auth/register` | Registra un usuario nuevo. Ignora cualquier `role` que mande el cliente — siempre queda `customer`. Devuelve `{ user, token }`. |
-| POST | `/api/auth/login` | Verifica email + password con bcrypt. Devuelve `{ user, token }`. |
+| POST | `/api/auth/register` | Registra un usuario nuevo. Ignora cualquier `role` que mande el cliente — siempre queda `customer`. Setea las cookies de sesión y devuelve `{ user }`. |
+| POST | `/api/auth/login` | Verifica email + password con bcrypt. Setea las cookies de sesión y devuelve `{ user }`. |
+| POST | `/api/auth/refresh` | Lee el `refreshToken` de la cookie, lo rota (invalida el viejo, emite uno nuevo) y renueva el `accessToken`. |
+| POST | `/api/auth/logout` | Borra el refresh token de la base y limpia las cookies. |
 
 El `POST /api/users` "genérico" (crear usuarios con cualquier rol, incluido `admin`) quedó reservado para admins autenticados — el alta pública de cuentas es siempre por `/api/auth/register`.
 
+### Login con GitHub (OAuth2)
+
+| Método | Ruta | Descripción |
+| --- | --- | --- |
+| GET | `/api/auth/github` | Redirige a GitHub para autenticarse (requiere abrirlo en un navegador real, no funciona desde Postman). |
+| GET | `/api/auth/github/callback` | GitHub redirige acá después del login. Busca al usuario por `githubId`; si no existe pero ya hay una cuenta con el mismo email, la enlaza; si no existe ninguna, crea una cuenta nueva con `role: customer` y sin password. Setea las cookies igual que un login normal. |
+| GET | `/api/auth/github/failure` | Callback de error si GitHub rechaza la autenticación. |
+
+Requiere una OAuth App creada en GitHub (`Settings → Developer settings → OAuth Apps`), con **Authorization callback URL** apuntando a `http://localhost:8080/api/auth/github/callback` (o el dominio real en producción).
+
 ### Cómo autenticarse
 
-Todas las rutas protegidas esperan el token en el header:
+Los endpoints de login/register/refresh/GitHub setean automáticamente dos cookies `httpOnly`:
 
-```
-Authorization: Bearer <token>
-```
+- **`accessToken`** — vive en toda la API (`path: "/"`), dura poco (`JWT_EXPIRES_IN`, default `15m`). Es la que valida `passport-jwt` en cada request protegido.
+- **`refreshToken`** — acotada solo a `/api/auth/*` (`path: "/api/auth"`), dura más (`REFRESH_TOKEN_EXPIRES_DAYS`, default `7` días), y se usa únicamente para pedir un `accessToken` nuevo sin volver a loguearse. Se guarda hasheada (SHA-256) en la colección `RefreshToken`, nunca en texto plano — y rota en cada uso: si alguien reusa un refresh token ya gastado, se lo rechaza.
 
-`src/config/passport.config.js` define la estrategia JWT: en cada request, vuelve a buscar el usuario en la base a partir del `id` del token (no confía en el rol que venga codificado ahí) — así un usuario cuyo rol cambió, o que fue borrado, deja de tener acceso en el próximo request sin necesidad de revocar nada manualmente.
+Con Postman: primero hacé login (`POST /api/auth/login`), Postman guarda las cookies solo; los siguientes requests las reenvían automáticamente, siempre que apunten al mismo host/puerto. Con GitHub, el login ocurre en el navegador (no en Postman) — para probar un endpoint protegido en Postman después de loguearte por GitHub hay que copiar el valor de la cookie `accessToken` desde las devtools del navegador, o probar directo en Swagger UI en la misma pestaña donde iniciaste sesión (comparte el cookie jar del navegador).
+
+`src/config/passport.config.js` define la estrategia JWT con un extractor propio que lee `req.cookies.accessToken` (no el header): en cada request, vuelve a buscar el usuario en la base a partir del `id` del token (no confía en el rol que venga codificado ahí) — así un usuario cuyo rol cambió, o que fue borrado, deja de tener acceso en el próximo request sin necesidad de revocar nada manualmente.
 
 Dos middlewares en `src/middlewares/auth.middleware.js`:
 
-- `authenticate` — exige un token válido. Si falta o es inválido, `401 UNAUTHORIZED`.
+- `authenticate` — exige una cookie `accessToken` válida. Si falta o es inválida, `401 UNAUTHORIZED`.
 - `authorizeRole([...roles])` — exige que `req.user.role` esté en la lista. Si no, `403 FORBIDDEN`.
 
 El "ownership" (¿sos vos, o el dueño de esto?) no vive en un middleware genérico — se resuelve en cada Service, comparando `req.user._id` contra el dueño real del recurso.
@@ -223,13 +241,18 @@ El "ownership" (¿sos vos, o el dueño de esto?) no vive en un middleware genér
 | | Ver una / Actualizar estado | el `driver` asignado, el dueño de la `store` de esa orden, o `admin` |
 | | Crear | el dueño de la `store` de la orden, o `admin` |
 
-### Variable de entorno nueva
+### Variables de entorno de auth
 
 ```
 JWT_SECRET=<string largo y random>
+JWT_EXPIRES_IN=15m
+REFRESH_TOKEN_EXPIRES_DAYS=7
+GITHUB_CLIENT_ID=<client id de tu OAuth App>
+GITHUB_CLIENT_SECRET=<client secret de tu OAuth App>
+GITHUB_CALLBACK_URL=http://localhost:8080/api/auth/github/callback
 ```
 
-Obligatoria — `env.config.js` no arranca la app si falta. `JWT_EXPIRES_IN` es opcional, con default `1d`.
+Solo `JWT_SECRET` es obligatoria — `env.config.js` no arranca la app si falta. El resto son opcionales: `JWT_EXPIRES_IN` (default `15m`) y `REFRESH_TOKEN_EXPIRES_DAYS` (default `7`) tienen su propio default si no las seteás; las tres de GitHub, si no están configuradas, simplemente hacen que la estrategia de GitHub no se registre (`passport.config.js` lo chequea con un `if`) — el resto de la API funciona igual, solo quedan sin usar las rutas `/api/auth/github*`.
 
 ---
 
@@ -242,10 +265,25 @@ Obligatoria — `env.config.js` no arranca la app si falta. `JWT_EXPIRES_IN` es 
 | firstName   | String  | requerido                                                                          |
 | lastName    | String  | requerido                                                                          |
 | email       | String  | requerido, único                                                                   |
-| password    | String  | requerido, se guarda hasheado con bcrypt                                           |
+| password    | String  | requerido **salvo que tenga `githubId`** (cuentas creadas por GitHub OAuth no tienen password local), se guarda hasheado con bcrypt |
+| githubId    | String  | opcional, único (`sparse`) — presente solo si la cuenta se creó o se enlazó vía GitHub OAuth |
 | role        | String  | enum: `admin`, `customer`, `driver`, `store`, `user`, `owner` — default `customer` |
 | isAvailable | Boolean | default `false`                                                                    |
-| documents   | Array   | default `[]`                                                                       |
+| documents   | `[documentsSchema]` | default `[]` — ver estructura de documento más abajo                 |
+
+**Estructura de un documento** (`src/models/documents.model.js`, compartida entre `User.documents` y `Order.proof`):
+
+| Campo | Tipo | Notas |
+| --- | --- | --- |
+| originalName | String | requerido — nombre original del archivo subido |
+| fileName | String | requerido — nombre generado en disco (`timestamp-random.ext`) |
+| path | String | requerido — ruta donde `multer` guardó el archivo |
+| mimeType | String | requerido |
+| size | Number | requerido, en bytes |
+| type | String | requerido — uno de `DOCUMENT_TYPES`: `user_document`, `driver_license`, `delivery_proof` |
+| uploadedAt | Date | default `Date.now` |
+
+Subida vía `POST /api/users/:uid/document` (`multipart/form-data`, campo `document`) — el propio usuario o un admin. Si `type` es `driver_license`, el usuario destino tiene que tener `role: "driver"`, si no, `403 FORBIDDEN`.
 
 ### Stores (`/api/stores`)
 
@@ -280,9 +318,9 @@ Un comercio inactivo (`isActive: false`) no puede actualizarse (`STORE_NOT_ACTIV
 | total           | Number                           | calculado automáticamente por el servidor (`Σ price real * quantity`), ignora el `price` enviado por el cliente |
 | status          | String                           | enum: `created`, `assigned`, `picked_up`, `in_transit`, `delivered`, `cancelled` — default `created`            |
 | priority        | String                           | enum de `DELIVERY_PRIORITY` — default `normal`                                                                  |
-| proof           | Object                           | default `null`                                                                                                  |
+| proof           | `[documentsSchema]`              | default `[]` — comprobantes de entrega (ver estructura de documento en la sección de Users)                     |
 
-Al crear un pedido, el servicio valida que cada producto exista y tenga stock suficiente, y descuenta el stock vendido del producto correspondiente.
+Al crear un pedido, el servicio valida que cada producto exista y tenga stock suficiente, y descuenta el stock vendido del producto correspondiente. El comprobante de entrega se sube por separado, vía `POST /api/orders/:oid/proof` (`multipart/form-data`, campo `proof`) — solo el dueño de la tienda del pedido, o un admin; el `type` queda fijo en `delivery_proof`, no lo elige quien sube el archivo.
 
 ### Deliveries (`/api/deliveries`)
 
@@ -306,15 +344,28 @@ Al crear un pedido, el servicio valida que cada producto exista y tenga stock su
 
 ## Endpoints
 
+### Auth — `/api/auth`
+
+| Método | Ruta               | Descripción                              |
+| ------ | ------------------ | ----------------------------------------- |
+| POST   | `/register`        | Registrar usuario nuevo (rol forzado a `customer`) |
+| POST   | `/login`           | Login con email + password                |
+| POST   | `/refresh`         | Renovar el access token (rota el refresh) |
+| POST   | `/logout`          | Cerrar sesión, invalidar el refresh token |
+| GET    | `/github`          | Iniciar login con GitHub (redirect)       |
+| GET    | `/github/callback` | Callback de GitHub tras el login          |
+| GET    | `/github/failure`  | Callback de error de GitHub               |
+
 ### Users — `/api/users`
 
-| Método | Ruta    | Descripción            |
-| ------ | ------- | ---------------------- |
-| GET    | `/`     | Listar usuarios        |
-| GET    | `/:uid` | Obtener usuario por ID |
-| POST   | `/`     | Crear usuario          |
-| PUT    | `/:uid` | Actualizar usuario     |
-| DELETE | `/:uid` | Eliminar usuario       |
+| Método | Ruta               | Descripción                        |
+| ------ | ------------------ | ----------------------------------- |
+| GET    | `/`                | Listar usuarios                    |
+| GET    | `/:uid`            | Obtener usuario por ID             |
+| POST   | `/`                | Crear usuario                      |
+| PUT    | `/:uid`            | Actualizar usuario                 |
+| DELETE | `/:uid`            | Eliminar usuario                   |
+| POST   | `/:uid/document`   | Subir un documento al perfil (`multipart/form-data`, campo `document`) |
 
 ### Stores — `/api/stores`
 
@@ -327,12 +378,13 @@ Mismos verbos que Users, con `:pid`.
 ### Orders — `/api/orders`
 
 | Método | Ruta           | Descripción                  |
-| ------ | -------------- | ---------------------------- |
+| ------ | -------------- | ----------------------------- |
 | GET    | `/`            | Listar pedidos               |
 | GET    | `/:oid`        | Obtener pedido por ID        |
 | POST   | `/`            | Crear pedido                 |
 | PUT    | `/:oid/status` | Actualizar estado del pedido |
 | DELETE | `/:oid`        | Eliminar pedido              |
+| POST   | `/:oid/proof`  | Subir comprobante de entrega (`multipart/form-data`, campo `proof`) |
 
 ### Deliveries — `/api/deliveries`
 
@@ -360,7 +412,7 @@ Mismos verbos que Users, con `:pid`.
 ### Utilitarios
 
 - `GET /` — status de la API
-- `GET /health` — healthcheck
+- `GET /health` — healthcheck: además de `status`/`message`, devuelve `environment` (`env.nodeEnv`), `uptime` (segundos desde que arrancó el proceso) y `timestamp` (ISO 8601 del servidor)
 - `GET /api/docs` — documentación interactiva (Swagger UI)
 - `GET /api/loggerTest` — dispara un log de cada nivel (debug/http/info/warn/error/fatal) para probar Winston
 
@@ -375,9 +427,16 @@ PORT=8080
 MONGODB_URI=mongodb://localhost:27017/shipnow
 NODE_ENV=development
 JWT_SECRET=<string largo y random>
+
+# opcionales — ver detalle en "Autenticación y autorización"
+JWT_EXPIRES_IN=15m
+REFRESH_TOKEN_EXPIRES_DAYS=7
+GITHUB_CLIENT_ID=
+GITHUB_CLIENT_SECRET=
+GITHUB_CALLBACK_URL=http://localhost:8080/api/auth/github/callback
 ```
 
-Las cuatro son obligatorias: la app no arranca si falta alguna (`env.config.js` valida esto al inicio).
+`PORT`, `MONGODB_URI`, `NODE_ENV` y `JWT_SECRET` son obligatorias: la app no arranca si falta alguna (`env.config.js` valida esto al inicio). El resto son opcionales, con sus propios defaults o comportamiento condicional.
 
 ---
 
@@ -394,6 +453,19 @@ npm start
 ```
 
 Con el servidor corriendo, la documentación interactiva queda disponible en `http://localhost:8080/api/docs` (ver sección [Documentación interactiva (Swagger)](#documentación-interactiva-swagger)).
+
+---
+
+## Docker
+
+```bash
+docker build -t shipnow-api .
+docker run -d -p 8080:8080 --env-file .env shipnow-api
+```
+
+El `dockerfile` usa `node:22-alpine`, copia `package*.json` primero para aprovechar la cache de capas, instala dependencias, copia el resto del código y corre `npm start` (no `npm run dev` — dentro de un contenedor ya construido no tiene sentido correr `nodemon`, no hay archivos que vayan a cambiar en caliente).
+
+El `.dockerignore` excluye `node_modules`, `.git`, `test/`, `uploads/`, los `.env*` y los logs — la imagen no necesita nada de eso para correr. La base de datos sigue siendo MongoDB Atlas (no hay un contenedor de Mongo local), así que alcanza con un solo contenedor — no hace falta `docker-compose`.
 
 ---
 
@@ -428,12 +500,15 @@ El script (`node --env-file=.env.test node_modules/.bin/mocha`) carga esas varia
 | Archivo                    | Cubre                                                                                                                                                                                              |
 | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `test/utils.test.js`      | `GET /`, `GET /health`, `GET /api/docs` (redirect + Swagger UI), `GET /api/loggerTest`, y una ruta inexistente (`404 ROUTE_NOT_FOUND`)                                                            |
-| `test/users.test.js`      | CRUD de usuarios con auth: creación admin-only, ver/editar propio perfil vs ajeno (403), 404, ID inválido — incluye la verificación de que el `password` nunca se expone en la respuesta          |
+| `test/auth.test.js`       | Registro, login (credenciales inválidas incluidas), refresh (con rotación del refresh token), logout — validando que las cookies `accessToken`/`refreshToken` se seteen y limpien correctamente  |
+| `test/users.test.js`      | CRUD de usuarios con auth: creación admin-only, ver/editar propio perfil vs ajeno (403), carga de documentos (con la regla de `driver_license` solo para `driver`), 404, ID inválido — incluye la verificación de que el `password` nunca se expone en la respuesta |
 | `test/stores.test.js`     | Creación (con ownership), listado/detalle público, actualización/borrado solo por el dueño o admin                                                                                                |
 | `test/products.test.js`   | Creación ligada a una `store` (con ownership), listado/detalle público, actualización/borrado solo por el dueño de la tienda o admin                                                             |
-| `test/orders.test.js`     | Creación (con ownership del `customer`, precio/stock recalculados del lado del servidor), listado admin-only, detalle (customer/store dueños o admin), actualización de estado (solo store dueña) |
+| `test/orders.test.js`     | Creación (con ownership del `customer`, precio/stock recalculados del lado del servidor), listado admin-only, detalle (customer/store dueños o admin), actualización de estado (solo store dueña), carga de comprobante de entrega |
 | `test/deliveries.test.js` | Creación por el dueño de la tienda de la orden, detalle/actualización por el `driver` asignado o la tienda dueña, listado/borrado admin-only                                                      |
 | `test/mock.test.js`       | Los 5 generadores de datos mock, guardado real de usuarios mock en la base, y cantidades inválidas de `n` (no numérico, negativo)                                                                 |
+
+Como la autenticación viaja en cookies, los tests que necesitan simular un usuario logueado arman el token con `generateToken(...)` (mismo helper que usa el login real) y lo adjuntan a mano con `.set("Cookie", \`accessToken=${token}\`)` — no hace falta pasar por el flujo completo de login en cada test.
 
 Todos los casos de error verifican tanto el status HTTP como el formato de error definido en `errors.dictionary.js` (`{ status: "error", error: "<CODIGO>", message: "..." }`), incluyendo los casos de `401 UNAUTHORIZED` y `403 FORBIDDEN` de cada endpoint protegido.
 
