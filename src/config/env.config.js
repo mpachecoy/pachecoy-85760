@@ -16,8 +16,8 @@ export const env = {
     nodeEnv: process.env.NODE_ENV || "development",
     jwtSecret: process.env.JWT_SECRET,
     jwtExpiresIn: process.env.JWT_EXPIRES_IN || "15m",
-    refreshTokenExpiresDays: Number(process.env.REFRESH_TOKEN_EXPIRES_DAYS) || 7
-    // githubClientId: process.env.GITHUB_CLIENT_ID,
-    // githubClientSecret: process.env.GITHUB_CLIENT_SECRET,
-    // githubCallbackURL: process.env.GITHUB_CALLBACK_URL
+    refreshTokenExpiresDays: Number(process.env.REFRESH_TOKEN_EXPIRES_DAYS) || 7,
+    githubClientId: process.env.GITHUB_CLIENT_ID,
+    githubClientSecret: process.env.GITHUB_CLIENT_SECRET,
+    githubCallbackURL: process.env.GITHUB_CALLBACK_URL
 }

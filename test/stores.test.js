@@ -67,7 +67,7 @@ describe("Test FUNCIONAL - Módulo Stores", () => {
         it("Rechaza crear una tienda a nombre de otro usuario (403)", async () => {
             const response = await request
                 .post("/api/stores")
-                .set("Authorization", `Bearer ${ownerToken}`)
+                .set("Cookie", `accessToken=${ownerToken}`)
                 .send({
                     name: "Tienda Ajena",
                     address: "Calle 1",
@@ -81,7 +81,7 @@ describe("Test FUNCIONAL - Módulo Stores", () => {
         it("Rechaza si el owner no tiene rol 'store' (400)", async () => {
             const response = await request
                 .post("/api/stores")
-                .set("Authorization", `Bearer ${customerToken}`)
+                .set("Cookie", `accessToken=${customerToken}`)
                 .send({
                     name: "Tienda Inválida",
                     address: "Calle 1",
@@ -95,7 +95,7 @@ describe("Test FUNCIONAL - Módulo Stores", () => {
         it("Crea una tienda válida cuando el owner es vos mismo", async () => {
             const response = await request
                 .post("/api/stores")
-                .set("Authorization", `Bearer ${ownerToken}`)
+                .set("Cookie", `accessToken=${ownerToken}`)
                 .send({
                     name: "Tienda Test",
                     address: "Calle Falsa 123",
@@ -138,7 +138,7 @@ describe("Test FUNCIONAL - Módulo Stores", () => {
         it("Rechaza la actualización si no sos el dueño (403)", async () => {
             const response = await request
                 .put(`/api/stores/${createdStoreId}`)
-                .set("Authorization", `Bearer ${outsiderToken}`)
+                .set("Cookie", `accessToken=${outsiderToken}`)
                 .send({ address: "Otra Calle 456" });
 
             expect(response.status).to.equal(403);
@@ -147,7 +147,7 @@ describe("Test FUNCIONAL - Módulo Stores", () => {
         it("El dueño puede actualizar su tienda", async () => {
             const response = await request
                 .put(`/api/stores/${createdStoreId}`)
-                .set("Authorization", `Bearer ${ownerToken}`)
+                .set("Cookie", `accessToken=${ownerToken}`)
                 .send({ address: "Otra Calle 456" });
 
             expect(response.status).to.equal(200);
@@ -159,7 +159,7 @@ describe("Test FUNCIONAL - Módulo Stores", () => {
         it("Rechaza el borrado si no sos el dueño ni admin (403)", async () => {
             const response = await request
                 .delete(`/api/stores/${createdStoreId}`)
-                .set("Authorization", `Bearer ${outsiderToken}`);
+                .set("Cookie", `accessToken=${outsiderToken}`);
 
             expect(response.status).to.equal(403);
         });
@@ -167,7 +167,7 @@ describe("Test FUNCIONAL - Módulo Stores", () => {
         it("El dueño puede borrar su tienda", async () => {
             const response = await request
                 .delete(`/api/stores/${createdStoreId}`)
-                .set("Authorization", `Bearer ${ownerToken}`);
+                .set("Cookie", `accessToken=${ownerToken}`);
 
             expect(response.status).to.equal(200);
 

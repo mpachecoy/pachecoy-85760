@@ -96,7 +96,7 @@ describe("Test FUNCIONAL - Módulo Deliveries", () => {
         it("Rechaza crear una entrega si no sos el dueño de la tienda de esa orden (403)", async () => {
             const response = await request
                 .post("/api/deliveries")
-                .set("Authorization", `Bearer ${outsiderToken}`)
+                .set("Cookie", `accessToken=${outsiderToken}`)
                 .send({
                     order: order._id,
                     driver: driver._id
@@ -109,7 +109,7 @@ describe("Test FUNCIONAL - Módulo Deliveries", () => {
         it("El dueño de la tienda crea la entrega y asigna un repartidor", async () => {
             const response = await request
                 .post("/api/deliveries")
-                .set("Authorization", `Bearer ${storeOwnerToken}`)
+                .set("Cookie", `accessToken=${storeOwnerToken}`)
                 .send({
                     order: order._id,
                     driver: driver._id
@@ -127,7 +127,7 @@ describe("Test FUNCIONAL - Módulo Deliveries", () => {
         it("Rechaza el listado si no sos admin (403)", async () => {
             const response = await request
                 .get("/api/deliveries")
-                .set("Authorization", `Bearer ${storeOwnerToken}`);
+                .set("Cookie", `accessToken=${storeOwnerToken}`);
 
             expect(response.status).to.equal(403);
         });
@@ -135,7 +135,7 @@ describe("Test FUNCIONAL - Módulo Deliveries", () => {
         it("Como admin, devuelve la lista de entregas", async () => {
             const response = await request
                 .get("/api/deliveries")
-                .set("Authorization", `Bearer ${adminToken}`);
+                .set("Cookie", `accessToken=${adminToken}`);
 
             expect(response.status).to.equal(200);
             expect(response.body.payload).to.be.an("array");
@@ -146,7 +146,7 @@ describe("Test FUNCIONAL - Módulo Deliveries", () => {
         it("El repartidor asignado puede verla", async () => {
             const response = await request
                 .get(`/api/deliveries/${createdDeliveryId}`)
-                .set("Authorization", `Bearer ${driverToken}`);
+                .set("Cookie", `accessToken=${driverToken}`);
 
             expect(response.status).to.equal(200);
             expect(response.body.payload._id).to.equal(createdDeliveryId);
@@ -156,7 +156,7 @@ describe("Test FUNCIONAL - Módulo Deliveries", () => {
         it("El dueño de la tienda puede verla", async () => {
             const response = await request
                 .get(`/api/deliveries/${createdDeliveryId}`)
-                .set("Authorization", `Bearer ${storeOwnerToken}`);
+                .set("Cookie", `accessToken=${storeOwnerToken}`);
 
             expect(response.status).to.equal(200);
         });
@@ -164,7 +164,7 @@ describe("Test FUNCIONAL - Módulo Deliveries", () => {
         it("Rechaza a un repartidor ajeno (403)", async () => {
             const response = await request
                 .get(`/api/deliveries/${createdDeliveryId}`)
-                .set("Authorization", `Bearer ${outsiderToken}`);
+                .set("Cookie", `accessToken=${outsiderToken}`);
 
             expect(response.status).to.equal(403);
         });
@@ -172,7 +172,7 @@ describe("Test FUNCIONAL - Módulo Deliveries", () => {
         it("Devuelve 404 si la entrega no existe", async () => {
             const response = await request
                 .get("/api/deliveries/000000000000000000000000")
-                .set("Authorization", `Bearer ${adminToken}`);
+                .set("Cookie", `accessToken=${adminToken}`);
 
             expect(response.status).to.equal(404);
             expect(response.body.error).to.equal("DELIVERY_NOT_FOUND");
@@ -183,7 +183,7 @@ describe("Test FUNCIONAL - Módulo Deliveries", () => {
         it("Rechaza la actualización si sos un repartidor ajeno (403)", async () => {
             const response = await request
                 .put(`/api/deliveries/${createdDeliveryId}/status`)
-                .set("Authorization", `Bearer ${outsiderToken}`)
+                .set("Cookie", `accessToken=${outsiderToken}`)
                 .send({ status: "assigned" });
 
             expect(response.status).to.equal(403);
@@ -192,7 +192,7 @@ describe("Test FUNCIONAL - Módulo Deliveries", () => {
         it("El repartidor asignado actualiza el estado", async () => {
             const response = await request
                 .put(`/api/deliveries/${createdDeliveryId}/status`)
-                .set("Authorization", `Bearer ${driverToken}`)
+                .set("Cookie", `accessToken=${driverToken}`)
                 .send({ status: "assigned" });
 
             expect(response.status).to.equal(200);
@@ -202,7 +202,7 @@ describe("Test FUNCIONAL - Módulo Deliveries", () => {
         it("Rechaza si faltan datos requeridos (400)", async () => {
             const response = await request
                 .put(`/api/deliveries/${createdDeliveryId}/status`)
-                .set("Authorization", `Bearer ${driverToken}`)
+                .set("Cookie", `accessToken=${driverToken}`)
                 .send({});
 
             expect(response.status).to.equal(400);
@@ -214,7 +214,7 @@ describe("Test FUNCIONAL - Módulo Deliveries", () => {
         it("Rechaza el borrado si no sos admin (403)", async () => {
             const response = await request
                 .delete(`/api/deliveries/${createdDeliveryId}`)
-                .set("Authorization", `Bearer ${storeOwnerToken}`);
+                .set("Cookie", `accessToken=${storeOwnerToken}`);
 
             expect(response.status).to.equal(403);
         });
@@ -222,7 +222,7 @@ describe("Test FUNCIONAL - Módulo Deliveries", () => {
         it("Como admin, borra la entrega", async () => {
             const response = await request
                 .delete(`/api/deliveries/${createdDeliveryId}`)
-                .set("Authorization", `Bearer ${adminToken}`);
+                .set("Cookie", `accessToken=${adminToken}`);
 
             expect(response.status).to.equal(200);
 

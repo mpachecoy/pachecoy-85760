@@ -65,7 +65,7 @@ describe("Test FUNCIONAL - Módulo Users", () => {
         it("Rechaza la creación si el token no es de admin (403)", async () => {
             const response = await request
                 .post("/api/users")
-                .set("Authorization", `Bearer ${otherToken}`)
+                .set("Cookie", `accessToken=${otherToken}`)
                 .send({
                     firstName: "Sin",
                     lastName: "Permiso",
@@ -80,7 +80,7 @@ describe("Test FUNCIONAL - Módulo Users", () => {
         it("Como admin, crea un usuario válido y responde 201 sin exponer el password", async () => {
             const response = await request
                 .post("/api/users")
-                .set("Authorization", `Bearer ${adminToken}`)
+                .set("Cookie", `accessToken=${adminToken}`)
                 .send({
                     firstName: "Test",
                     lastName: "User",
@@ -98,7 +98,7 @@ describe("Test FUNCIONAL - Módulo Users", () => {
         it("Como admin, rechaza la creación si faltan datos requeridos (400)", async () => {
             const response = await request
                 .post("/api/users")
-                .set("Authorization", `Bearer ${adminToken}`)
+                .set("Cookie", `accessToken=${adminToken}`)
                 .send({ firstName: "Incompleto" });
 
             expect(response.status).to.equal(400);
@@ -116,7 +116,7 @@ describe("Test FUNCIONAL - Módulo Users", () => {
         it("Rechaza el listado si no sos admin (403)", async () => {
             const response = await request
                 .get("/api/users")
-                .set("Authorization", `Bearer ${otherToken}`);
+                .set("Cookie", `accessToken=${otherToken}`)
 
             expect(response.status).to.equal(403);
         });
@@ -124,7 +124,7 @@ describe("Test FUNCIONAL - Módulo Users", () => {
         it("Como admin, devuelve la lista de usuarios", async () => {
             const response = await request
                 .get("/api/users")
-                .set("Authorization", `Bearer ${adminToken}`);
+                .set("Cookie", `accessToken=${adminToken}`)
 
             expect(response.status).to.equal(200);
             expect(response.body.payload).to.be.an("array");
@@ -135,7 +135,7 @@ describe("Test FUNCIONAL - Módulo Users", () => {
         it("Un usuario puede ver su propio perfil", async () => {
             const response = await request
                 .get(`/api/users/${createdUserId}`)
-                .set("Authorization", `Bearer ${ownToken}`);
+                .set("Cookie", `accessToken=${adminToken}`)
 
             expect(response.status).to.equal(200);
             expect(response.body.payload._id).to.equal(createdUserId);
@@ -144,7 +144,7 @@ describe("Test FUNCIONAL - Módulo Users", () => {
         it("Como admin, devuelve el usuario por ID", async () => {
             const response = await request
                 .get(`/api/users/${createdUserId}`)
-                .set("Authorization", `Bearer ${adminToken}`);
+                .set("Cookie", `accessToken=${adminToken}`)
 
             expect(response.status).to.equal(200);
         });
@@ -152,7 +152,7 @@ describe("Test FUNCIONAL - Módulo Users", () => {
         it("Rechaza ver el perfil de otro usuario si no sos admin (403)", async () => {
             const response = await request
                 .get(`/api/users/${createdUserId}`)
-                .set("Authorization", `Bearer ${otherToken}`);
+                .set("Cookie", `accessToken=${otherToken}`)
 
             expect(response.status).to.equal(403);
         });
@@ -160,7 +160,7 @@ describe("Test FUNCIONAL - Módulo Users", () => {
         it("Devuelve 404 si el usuario no existe", async () => {
             const response = await request
                 .get("/api/users/000000000000000000000000")
-                .set("Authorization", `Bearer ${adminToken}`);
+                .set("Cookie", `accessToken=${adminToken}`)
 
             expect(response.status).to.equal(404);
             expect(response.body.error).to.equal("USER_NOT_FOUND");
@@ -169,7 +169,7 @@ describe("Test FUNCIONAL - Módulo Users", () => {
         it("Devuelve 400 si el ID no tiene formato válido de Mongo", async () => {
             const response = await request
                 .get("/api/users/id-invalido")
-                .set("Authorization", `Bearer ${adminToken}`);
+                .set("Cookie", `accessToken=${adminToken}`)
 
             expect(response.status).to.equal(400);
             expect(response.body.error).to.equal("INVALID_ID");
@@ -188,7 +188,7 @@ describe("Test FUNCIONAL - Módulo Users", () => {
         it("Rechaza subir un documento al perfil de otro usuario (403)", async () => {
             const response = await request
                 .post(`/api/users/${createdUserId}/document`)
-                .set("Authorization", `Bearer ${otherToken}`)
+                .set("Cookie", `accessToken=${otherToken}`)
                 .field("type", "user_document")
                 .attach("document", Buffer.from("contenido de prueba"), "doc.txt");
 
@@ -198,7 +198,7 @@ describe("Test FUNCIONAL - Módulo Users", () => {
         it("Rechaza cargar una licencia si el usuario no es driver (400)", async () => {
             const response = await request
                 .post(`/api/users/${createdUserId}/document`)
-                .set("Authorization", `Bearer ${ownToken}`)
+                .set("Cookie", `accessToken=${otherToken}`)
                 .field("type", "driver_license")
                 .attach("document", Buffer.from("contenido de prueba"), "licencia.txt");
 
@@ -209,7 +209,7 @@ describe("Test FUNCIONAL - Módulo Users", () => {
         it("El propio usuario puede subir un documento genérico", async () => {
             const response = await request
                 .post(`/api/users/${createdUserId}/document`)
-                .set("Authorization", `Bearer ${ownToken}`)
+                .set("Cookie", `accessToken=${adminToken}`)
                 .field("type", "user_document")
                 .attach("document", Buffer.from("contenido de prueba"), "doc.txt");
 
@@ -221,7 +221,7 @@ describe("Test FUNCIONAL - Módulo Users", () => {
         it("Un driver puede subir su propia licencia", async () => {
             const response = await request
                 .post(`/api/users/${driverUser._id}/document`)
-                .set("Authorization", `Bearer ${driverToken}`)
+                .set("Cookie", `accessToken=${driverToken}`)
                 .field("type", "driver_license")
                 .attach("document", Buffer.from("contenido de prueba"), "licencia.txt");
 

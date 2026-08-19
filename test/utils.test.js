@@ -28,14 +28,16 @@ describe("Test FUNCIONAL - Logger, Swagger y rutas inexistentes", () => {
     });
 
     describe("GET /health", () => {
-        it("Devuelve el healthcheck", async () => {
+        it("Devuelve el healthcheck con entorno, uptime y timestamp", async () => {
             const response = await request.get("/health");
 
             expect(response.status).to.equal(200);
-            expect(response.body).to.deep.equal({
-                status: "success",
-                message: "API funcionando"
-            });
+            expect(response.body.status).to.equal("success");
+            expect(response.body.message).to.equal("API funcionando");
+            expect(response.body.environment).to.equal("test");
+            expect(response.body.uptime).to.be.a("number");
+            expect(response.body.timestamp).to.be.a("string");
+            expect(new Date(response.body.timestamp).toString()).to.not.equal("Invalid Date");
         });
     });
 

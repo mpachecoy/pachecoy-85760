@@ -7,6 +7,13 @@ import RefreshTokenModel from "../src/models/refreshToken.model.js";
 
 const request = supertest(app);
 
+const getCookieValue = (response, name) => {
+    const cookies = response.headers["set-cookie"] || [];
+    const match = cookies.find((c) => c.startsWith(`${name}=`));
+    if (!match) return null;
+    return match.split(";")[0].split("=")[1];
+};
+
 describe("Test FUNCIONAL - Módulo Auth", () => {
     let createdUserId;
     const email = `auth.test.${Date.now()}@mail.com`;
@@ -20,16 +27,16 @@ describe("Test FUNCIONAL - Módulo Auth", () => {
     });
 
     describe("POST /api/auth/register", () => {
-        it("Registra un usuario y devuelve accessToken + refreshToken", async () => {
+        it("Registra un usuario y setea las cookies de sesión", async () => {
             const response = await request.post("/api/auth/register").send({
                 firstName: "Auth", lastName: "Test", email, password
             });
 
             expect(response.status).to.equal(201);
-            expect(response.body.payload).to.have.property("accessToken");
-            expect(response.body.payload).to.have.property("refreshToken");
             expect(response.body.payload.user).to.not.have.property("password");
-            expect(response.body.payload.user.role).to.equal("customer");
+            expect(response.body.payload).to.not.have.property("accessToken");
+            expect(getCookieValue(response, "accessToken")).to.be.a("string");
+            expect(getCookieValue(response, "refreshToken")).to.be.a("string");
 
             createdUserId = response.body.payload.user._id;
         });
@@ -60,50 +67,57 @@ describe("Test FUNCIONAL - Módulo Auth", () => {
             expect(response.body.error).to.equal("INVALID_CREDENTIALS");
         });
 
-        it("Loguea correctamente y devuelve tokens", async () => {
+        it("Loguea correctamente y setea las cookies", async () => {
             const response = await request.post("/api/auth/login").send({ email, password });
 
             expect(response.status).to.equal(200);
-            expect(response.body.payload).to.have.property("accessToken");
-            expect(response.body.payload).to.have.property("refreshToken");
+            expect(getCookieValue(response, "accessToken")).to.be.a("string");
+            expect(getCookieValue(response, "refreshToken")).to.be.a("string");
         });
     });
 
     describe("POST /api/auth/refresh", () => {
-        it("Rechaza un refresh token inválido (401)", async () => {
-            const response = await request.post("/api/auth/refresh").send({
-                refreshToken: "token-que-no-existe"
-            });
+        it("Rechaza sin cookie de refresh (400)", async () => {
+            const response = await request.post("/api/auth/refresh");
 
-            expect(response.status).to.equal(401);
-            expect(response.body.error).to.equal("INVALID_REFRESH_TOKEN");
+            expect(response.status).to.equal(400);
+            expect(response.body.error).to.equal("MISSING_REQUIRED_DATA");
         });
 
-        it("Renueva el access token con un refresh token válido, y lo rota", async () => {
+        it("Renueva el access token y lo rota", async () => {
             const loginResponse = await request.post("/api/auth/login").send({ email, password });
-            const { refreshToken } = loginResponse.body.payload;
+            const refreshToken = getCookieValue(loginResponse, "refreshToken");
 
-            const refreshResponse = await request.post("/api/auth/refresh").send({ refreshToken });
+            const refreshResponse = await request
+                .post("/api/auth/refresh")
+                .set("Cookie", `refreshToken=${refreshToken}`);
 
             expect(refreshResponse.status).to.equal(200);
-            expect(refreshResponse.body.payload).to.have.property("accessToken");
-            expect(refreshResponse.body.payload.refreshToken).to.not.equal(refreshToken);
+            const newRefreshToken = getCookieValue(refreshResponse, "refreshToken");
+            expect(newRefreshToken).to.not.equal(refreshToken);
 
-            const reuseResponse = await request.post("/api/auth/refresh").send({ refreshToken });
+            const reuseResponse = await request
+                .post("/api/auth/refresh")
+                .set("Cookie", `refreshToken=${refreshToken}`);
             expect(reuseResponse.status).to.equal(401);
         });
     });
 
     describe("POST /api/auth/logout", () => {
-        it("Cierra la sesión y el refresh token deja de servir", async () => {
+        it("Cierra la sesión y limpia las cookies", async () => {
             const loginResponse = await request.post("/api/auth/login").send({ email, password });
-            const { refreshToken } = loginResponse.body.payload;
+            const refreshToken = getCookieValue(loginResponse, "refreshToken");
 
-            const logoutResponse = await request.post("/api/auth/logout").send({ refreshToken });
+            const logoutResponse = await request
+                .post("/api/auth/logout")
+                .set("Cookie", `refreshToken=${refreshToken}`);
+
             expect(logoutResponse.status).to.equal(200);
 
-            const refreshResponse = await request.post("/api/auth/refresh").send({ refreshToken });
-            expect(refreshResponse.status).to.equal(401);
+            const refreshAfterLogout = await request
+                .post("/api/auth/refresh")
+                .set("Cookie", `refreshToken=${refreshToken}`);
+            expect(refreshAfterLogout.status).to.equal(401);
         });
     });
 });

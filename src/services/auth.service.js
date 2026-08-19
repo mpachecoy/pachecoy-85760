@@ -86,5 +86,9 @@ export const AuthService = {
         }
         const tokenHash = hashToken(refreshToken);
         await RefreshTokenModel.findOneAndDelete({ tokenHash });
-    }
+    },
+
+    async issueTokensForUser(user) {
+        return await issueTokens(user);
+    },
 }

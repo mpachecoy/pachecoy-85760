@@ -84,7 +84,7 @@ describe("Test FUNCIONAL - Módulo Orders", () => {
         it("Rechaza crear un pedido a nombre de otro usuario (403)", async () => {
             const response = await request
                 .post("/api/orders")
-                .set("Authorization", `Bearer ${customerToken}`)
+                .set("Cookie", `accessToken=${customerToken}`)
                 .send({
                     customer: outsider._id,
                     store: store._id,
@@ -99,7 +99,7 @@ describe("Test FUNCIONAL - Módulo Orders", () => {
         it("Crea un pedido usando el precio real del producto, ignorando el precio del cliente", async () => {
             const response = await request
                 .post("/api/orders")
-                .set("Authorization", `Bearer ${customerToken}`)
+                .set("Cookie", `accessToken=${customerToken}`)
                 .send({
                     customer: customer._id,
                     store: store._id,
@@ -123,7 +123,7 @@ describe("Test FUNCIONAL - Módulo Orders", () => {
         it("Rechaza el pedido si faltan datos requeridos (400)", async () => {
             const response = await request
                 .post("/api/orders")
-                .set("Authorization", `Bearer ${customerToken}`)
+                .set("Cookie", `accessToken=${customerToken}`)
                 .send({ customer: customer._id });
 
             expect(response.status).to.equal(400);
@@ -133,7 +133,7 @@ describe("Test FUNCIONAL - Módulo Orders", () => {
         it("Rechaza el pedido si el producto no existe (404)", async () => {
             const response = await request
                 .post("/api/orders")
-                .set("Authorization", `Bearer ${customerToken}`)
+                .set("Cookie", `accessToken=${customerToken}`)
                 .send({
                     customer: customer._id, store: store._id,
                     deliveryAddress: "Av. Siempre Viva 742",
@@ -147,7 +147,7 @@ describe("Test FUNCIONAL - Módulo Orders", () => {
         it("Rechaza el pedido si no hay stock suficiente (400)", async () => {
             const response = await request
                 .post("/api/orders")
-                .set("Authorization", `Bearer ${customerToken}`)
+                .set("Cookie", `accessToken=${customerToken}`)
                 .send({
                     customer: customer._id, store: store._id,
                     deliveryAddress: "Av. Siempre Viva 742",
@@ -163,7 +163,7 @@ describe("Test FUNCIONAL - Módulo Orders", () => {
         it("Rechaza el listado si no sos admin (403)", async () => {
             const response = await request
                 .get("/api/orders")
-                .set("Authorization", `Bearer ${customerToken}`);
+                .set("Cookie", `accessToken=${customerToken}`);
 
             expect(response.status).to.equal(403);
         });
@@ -171,7 +171,7 @@ describe("Test FUNCIONAL - Módulo Orders", () => {
         it("Como admin, devuelve la lista de pedidos", async () => {
             const response = await request
                 .get("/api/orders")
-                .set("Authorization", `Bearer ${adminToken}`);
+                .set("Cookie", `accessToken=${adminToken}`);
 
             expect(response.status).to.equal(200);
             expect(response.body.payload).to.be.an("array");
@@ -182,7 +182,7 @@ describe("Test FUNCIONAL - Módulo Orders", () => {
         it("El customer dueño del pedido puede verlo", async () => {
             const response = await request
                 .get(`/api/orders/${createdOrderId}`)
-                .set("Authorization", `Bearer ${customerToken}`);
+                .set("Cookie", `accessToken=${customerToken}`);
 
             expect(response.status).to.equal(200);
             expect(response.body.payload._id).to.equal(createdOrderId);
@@ -192,7 +192,7 @@ describe("Test FUNCIONAL - Módulo Orders", () => {
         it("El dueño de la tienda puede verlo", async () => {
             const response = await request
                 .get(`/api/orders/${createdOrderId}`)
-                .set("Authorization", `Bearer ${storeOwnerToken}`);
+                .set("Cookie", `accessToken=${storeOwnerToken}`);
 
             expect(response.status).to.equal(200);
         });
@@ -200,7 +200,7 @@ describe("Test FUNCIONAL - Módulo Orders", () => {
         it("Rechaza a un usuario ajeno al pedido (403)", async () => {
             const response = await request
                 .get(`/api/orders/${createdOrderId}`)
-                .set("Authorization", `Bearer ${outsiderToken}`);
+                .set("Cookie", `accessToken=${outsiderToken}`);
 
             expect(response.status).to.equal(403);
         });
@@ -208,7 +208,7 @@ describe("Test FUNCIONAL - Módulo Orders", () => {
         it("Devuelve 404 si el pedido no existe", async () => {
             const response = await request
                 .get("/api/orders/000000000000000000000000")
-                .set("Authorization", `Bearer ${adminToken}`);
+                .set("Cookie", `accessToken=${adminToken}`);
 
             expect(response.status).to.equal(404);
             expect(response.body.error).to.equal("ORDER_NOT_FOUND");
@@ -219,7 +219,7 @@ describe("Test FUNCIONAL - Módulo Orders", () => {
         it("El customer no puede cambiar el estado (403)", async () => {
             const response = await request
                 .put(`/api/orders/${createdOrderId}/status`)
-                .set("Authorization", `Bearer ${customerToken}`)
+                .set("Cookie", `accessToken=${customerToken}`)
                 .send({ status: "assigned" });
 
             expect(response.status).to.equal(403);
@@ -228,7 +228,7 @@ describe("Test FUNCIONAL - Módulo Orders", () => {
         it("El dueño de la tienda actualiza el estado a un valor válido", async () => {
             const response = await request
                 .put(`/api/orders/${createdOrderId}/status`)
-                .set("Authorization", `Bearer ${storeOwnerToken}`)
+                .set("Cookie", `accessToken=${storeOwnerToken}`)
                 .send({ status: "assigned" });
 
             expect(response.status).to.equal(200);
@@ -238,7 +238,7 @@ describe("Test FUNCIONAL - Módulo Orders", () => {
         it("Rechaza un estado inválido (400)", async () => {
             const response = await request
                 .put(`/api/orders/${createdOrderId}/status`)
-                .set("Authorization", `Bearer ${storeOwnerToken}`)
+                .set("Cookie", `accessToken=${storeOwnerToken}`)
                 .send({ status: "estado_inventado" });
 
             expect(response.status).to.equal(400);
@@ -257,7 +257,7 @@ describe("Test FUNCIONAL - Módulo Orders", () => {
         it("Rechaza la subida si no sos el dueño de la tienda ni admin (403)", async () => {
             const response = await request
                 .post(`/api/orders/${createdOrderId}/proof`)
-                .set("Authorization", `Bearer ${customerToken}`)
+                .set("Cookie", `accessToken=${customerToken}`)
                 .attach("proof", Buffer.from("contenido de prueba"), "comprobante.txt");
 
             expect(response.status).to.equal(403);
@@ -266,7 +266,7 @@ describe("Test FUNCIONAL - Módulo Orders", () => {
         it("El dueño de la tienda sube el comprobante", async () => {
             const response = await request
                 .post(`/api/orders/${createdOrderId}/proof`)
-                .set("Authorization", `Bearer ${storeOwnerToken}`)
+                .set("Cookie", `accessToken=${storeOwnerToken}`)
                 .attach("proof", Buffer.from("contenido de prueba"), "comprobante.txt");
 
             expect(response.status).to.equal(200);

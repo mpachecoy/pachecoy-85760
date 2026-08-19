@@ -12,12 +12,16 @@ import docsRouter from "./routes/docs.router.js";
 import authRouter from "./routes/auth.router.js";
 import { errorHandler, notFoundHandler } from "./middlewares/error.middleware.js";
 import { env } from "./config/env.config.js";
+import helmet from "helmet";
+import cookieParser from "cookie-parser";
 
 const app = express();
 
+app.use(helmet());
 app.use(cors());
 app.use(express.json());
 app.use(passport.initialize());
+app.use(cookieParser());
 
 app.get("/", (req, res) => {
   res.json({
@@ -29,7 +33,10 @@ app.get("/", (req, res) => {
 app.get("/health", (req, res) => {
   res.json({
     status: "success",
-    message: "API funcionando"
+    message: "API funcionando",
+    environment: env.nodeEnv,
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString()
   });
 });
 
@@ -40,12 +47,11 @@ app.use("/api/deliveries", deliveriesRouter);
 app.use("/api/products", productsRouter);
 app.use("/api/auth", authRouter);
 
-app.use("/api/loggerTest", loggerTestRouter);
-
 app.use("/api/docs", docsRouter);
 
 if (env.nodeEnv !== "production") {
   app.use("/api/mocks", mockRouter);
+  app.use("/api/loggerTest", loggerTestRouter);
 };
 
 app.use(notFoundHandler);

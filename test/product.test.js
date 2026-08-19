@@ -68,7 +68,7 @@ describe("Test FUNCIONAL - Módulo Products", () => {
         it("Rechaza crear un producto en una tienda ajena (403)", async () => {
             const response = await request
                 .post("/api/products")
-                .set("Authorization", `Bearer ${ownerToken}`)
+                .set("Cookie", `accessToken=${ownerToken}`)
                 .send({
                     title: "Producto Ajeno", description: "Desc", price: 10, stock: 5,
                     category: "Test", store: otherStore._id
@@ -81,7 +81,7 @@ describe("Test FUNCIONAL - Módulo Products", () => {
         it("El dueño de la tienda crea un producto válido", async () => {
             const response = await request
                 .post("/api/products")
-                .set("Authorization", `Bearer ${ownerToken}`)
+                .set("Cookie", `accessToken=${ownerToken}`)
                 .send({
                     title: "Producto Test", description: "Desc", price: 10, stock: 5,
                     category: "Test", store: store._id
@@ -95,7 +95,7 @@ describe("Test FUNCIONAL - Módulo Products", () => {
         it("Rechaza si faltan datos requeridos (400)", async () => {
             const response = await request
                 .post("/api/products")
-                .set("Authorization", `Bearer ${ownerToken}`)
+                .set("Cookie", `accessToken=${ownerToken}`)
                 .send({ title: "Incompleto" });
 
             expect(response.status).to.equal(400);
@@ -132,7 +132,7 @@ describe("Test FUNCIONAL - Módulo Products", () => {
         it("Rechaza la actualización si no sos el dueño de la tienda (403)", async () => {
             const response = await request
                 .put(`/api/products/${createdProductId}`)
-                .set("Authorization", `Bearer ${outsiderToken}`)
+                .set("Cookie", `accessToken=${outsiderToken}`)
                 .send({ price: 20 });
 
             expect(response.status).to.equal(403);
@@ -141,7 +141,7 @@ describe("Test FUNCIONAL - Módulo Products", () => {
         it("El dueño de la tienda actualiza el producto", async () => {
             const response = await request
                 .put(`/api/products/${createdProductId}`)
-                .set("Authorization", `Bearer ${ownerToken}`)
+                .set("Cookie", `accessToken=${ownerToken}`)
                 .send({ price: 20 });
 
             expect(response.status).to.equal(200);
@@ -153,7 +153,7 @@ describe("Test FUNCIONAL - Módulo Products", () => {
         it("Rechaza el borrado si no sos el dueño ni admin (403)", async () => {
             const response = await request
                 .delete(`/api/products/${createdProductId}`)
-                .set("Authorization", `Bearer ${outsiderToken}`);
+                .set("Cookie", `accessToken=${outsiderToken}`);
 
             expect(response.status).to.equal(403);
         });
@@ -161,7 +161,7 @@ describe("Test FUNCIONAL - Módulo Products", () => {
         it("El dueño de la tienda puede borrar su producto", async () => {
             const response = await request
                 .delete(`/api/products/${createdProductId}`)
-                .set("Authorization", `Bearer ${ownerToken}`);
+                .set("Cookie", `accessToken=${ownerToken}`);
 
             expect(response.status).to.equal(200);
 
